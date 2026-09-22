@@ -1,6 +1,6 @@
-package hx.wardriver.hayos.model;
+package net.wigle.wigleandroid.model;
 
-import hx.wardriver.hayos.util.FilterJson;
+import net.wigle.wigleandroid.util.FilterJson;
 
 import org.junit.Assert;
 import org.junit.Test;

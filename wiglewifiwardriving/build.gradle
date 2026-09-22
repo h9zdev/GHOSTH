@@ -28,24 +28,16 @@ apply plugin: 'de.undercouch.download'
 apply plugin: 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 
 android {
-    namespace "hx.wardriver.hayos"
+    namespace "net.wigle.wigleandroid"
     compileSdk = 36
     defaultConfig {
-        applicationId "hx.wardriver.hayos"
+        applicationId "droid.wardriver.hx.os"
         minSdkVersion 24
         targetSdkVersion 36
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
         buildConfigField "boolean", "FOSS_MAIN_BUILD", "${isFossMainBuild()}"
-        def secretsFile = file("secrets.properties")
-        def mapsApiKey = "DEFAULT_API_KEY"
-        if (secretsFile.exists()) {
-            def props = new Properties()
-            secretsFile.withInputStream { props.load(it) }
-            mapsApiKey = props.getProperty("MAPS_API_KEY", "DEFAULT_API_KEY")
-        }
-        manifestPlaceholders = [MAPS_API_KEY: mapsApiKey]
     }
     buildFeatures {
         buildConfig = true

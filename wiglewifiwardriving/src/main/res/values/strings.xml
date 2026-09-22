@@ -2,8 +2,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="empty"></string>
     <string name="stats">Starting</string>
-    <string name="app_name">Wardrive H</string>
-    <string name="list_app_name">Wardrive H</string>
+    <string name="app_name">WiGLE WiFi Wardriving</string>
+    <string name="list_app_name">WiGLE WiFi</string>
     <string name="settings_app_name">Settings</string>
     <string name="mapping_app_name">Map</string>
     <string name="dashboard_app_name">Dashboard</string>
@@ -446,7 +446,7 @@
     <string name="login_title">Login required</string>
     <string name="login_required">You must be logged in to do this. Please log in or create an account if necessary.</string>
     <string name="login">Login</string>
-    <string name="registration_html_prompt">&lt;a href=\'hx.wardriver.hayos.register://register\'>Register&lt;/a&gt; @WiGLE.net or &lt;a href=\'hx.wardriver.hayos://activate\'&gt;activate now with QR code&lt;/a&gt;</string>
+    <string name="registration_html_prompt">&lt;a href=\'net.wigle.wigleandroid.register://register\'>Register&lt;/a&gt; @WiGLE.net or &lt;a href=\'net.wigle.wigleandroid://activate\'&gt;activate now with QR code&lt;/a&gt;</string>
     <string name="ble_services">BLE UUIDs:</string>
     <string name="ble_vendor">BLE Vendor ID:</string>
     <string name="speech_new_bt">New bluetooth to DB</string>
@@ -480,7 +480,7 @@
     <string name="add_mfgr_filter_button">Add Mfgr Id</string>
     <string name="alert_ble_mfgrs_filter_button">Alert on BLE Manufacturers</string>
     <string name="guess_le_address_type">Infer BLE Address Type</string>
-    <string name="use_foss_maps">Use OpenStreetMap (uncheck for Google Maps; custom vector tile URL/key below is optional)</string>
+    <string name="use_foss_maps">Use FOSS Maps (tile URL required)</string>
     <string name="foss_map_base_url">Map vector tile server style URL base</string>
     <string name="foss_map_key">Map vector base key</string>
     <string name="check_credentials">Verify</string>

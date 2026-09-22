@@ -54,10 +54,10 @@ We don't have a lot of contribution guidelines, but please:
 - Please be mindful of the need for multi-language support if adding text to the UI. Google translate is enough to get people started, but please add an attempt!
 
 ## Where to get it
-Available on [Google Play](https://play.google.com/store/apps/details?id=hx.wardriver.hayos&hl=en)
+Available on [Google Play](https://play.google.com/store/apps/details?id=net.wigle.wigleandroid&hl=en)
 and [Amazon App Store](http://www.amazon.com/WiGLE-net-Wigle-Wifi-Wardriving/dp/B004L5XBXS).
 
-F-Droid (externally maintained build of the [foss-main branch](https://github.com/wiglenet/wigle-wifi-wardriving/tree/foss-main): [https://f-droid.org/en/packages/hx.wardriver.hayos/](https://f-droid.org/en/packages/hx.wardriver.hayos/)
+F-Droid (externally maintained build of the [foss-main branch](https://github.com/wiglenet/wigle-wifi-wardriving/tree/foss-main): [https://f-droid.org/en/packages/net.wigle.wigleandroid/](https://f-droid.org/en/packages/net.wigle.wigleandroid/)
 
 ## How to use it
 There aren't presently any official how-to guides, but a youtube search will provide tutorials.

@@ -1,4 +1,4 @@
-package hx.wardriver.hayos;
+package net.wigle.wigleandroid;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -10,11 +10,11 @@ import android.content.Context;
 import androidx.test.filters.MediumTest;
 import androidx.test.runner.AndroidJUnit4;
 
-import hx.wardriver.hayos.model.Network;
-import hx.wardriver.hayos.model.NetworkType;
-import hx.wardriver.hayos.ui.NetworkListSorter;
-import hx.wardriver.hayos.ui.SetNetworkListAdapter;
-import hx.wardriver.hayos.util.Logging;
+import net.wigle.wigleandroid.model.Network;
+import net.wigle.wigleandroid.model.NetworkType;
+import net.wigle.wigleandroid.ui.NetworkListSorter;
+import net.wigle.wigleandroid.ui.SetNetworkListAdapter;
+import net.wigle.wigleandroid.util.Logging;
 
 import java.util.ArrayList;
 import java.util.List;

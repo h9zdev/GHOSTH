@@ -26,4 +26,3 @@ dependencyResolutionManagement {
     }
 }
 include ':wiglewifiwardriving'
-rootProject.name = 'Wardrive H'

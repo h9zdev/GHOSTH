@@ -445,7 +445,7 @@
     <string name="login_title">要求登录</string>
     <string name="login_required">您必须登录才能执行此操作。如有必要，请登录或创建一个帐户。</string>
     <string name="login">登录</string>
-    <string name="registration_html_prompt">&lt;a href=\'hx.wardriver.hayos.register://register\'>注册&lt;/a&gt; @WiGLE.net 或者 &lt;a href=\'hx.wardriver.hayos://activate\'&gt;立即使用二维码激活&lt;/a&gt;</string>
+    <string name="registration_html_prompt">&lt;a href=\'net.wigle.wigleandroid.register://register\'>注册&lt;/a&gt; @WiGLE.net 或者 &lt;a href=\'net.wigle.wigleandroid://activate\'&gt;立即使用二维码激活&lt;/a&gt;</string>
     <string name="ble_services">BLE UUID：</string>
     <string name="ble_vendor">BLE 供应商 ID：</string>
     <string name="speech_new_bt">新的蓝牙连接数据库</string>

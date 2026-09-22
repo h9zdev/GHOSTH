@@ -1,7 +1,7 @@
-package hx.wardriver.hayos.ui;
+package net.wigle.wigleandroid.ui;
 
-import hx.wardriver.hayos.model.Network;
-import hx.wardriver.hayos.model.NetworkType;
+import net.wigle.wigleandroid.model.Network;
+import net.wigle.wigleandroid.model.NetworkType;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;

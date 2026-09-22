@@ -1,4 +1,4 @@
-package hx.wardriver.hayos.background;
+package net.wigle.wigleandroid.background;
 import static org.mockito.Mockito.*;
 
 import android.database.Cursor;
@@ -6,7 +6,7 @@ import android.util.Log;
 
 import androidx.fragment.app.FragmentActivity;
 
-import hx.wardriver.hayos.db.DBException;
+import net.wigle.wigleandroid.db.DBException;
 
 import org.junit.After;
 import org.junit.Before;

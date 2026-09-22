@@ -28,7 +28,7 @@
 				android:gravity="start"/>
 		</RelativeLayout>
 		<fragment
-			android:name="hx.wardriver.hayos.NetListFragment"
+			android:name="net.wigle.wigleandroid.NetListFragment"
 			android:id="@+id/net_list"
 			android:layout_below="@id/result_back_button_row"
 			android:layout_width="fill_parent"

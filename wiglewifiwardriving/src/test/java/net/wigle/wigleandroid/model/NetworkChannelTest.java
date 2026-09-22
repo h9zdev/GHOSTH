@@ -1,4 +1,4 @@
-package hx.wardriver.hayos.model;
+package net.wigle.wigleandroid.model;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;

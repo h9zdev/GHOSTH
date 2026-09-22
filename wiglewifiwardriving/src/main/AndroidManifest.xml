@@ -29,7 +29,7 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="hx.wardriver.hayos.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="droid.wardriver.hx.os.permission.MAPS_RECEIVE" />
     <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -43,7 +43,7 @@
     <uses-permission-sdk-23 android:name="android.permission.CAMERA" />
 
     <permission
-        android:name="hx.wardriver.hayos.permission.MAPS_RECEIVE"
+        android:name="droid.wardriver.hx.os.permission.MAPS_RECEIVE"
         android:protectionLevel="signature" />
 
     <uses-feature
@@ -101,11 +101,11 @@
             android:theme="@style/ChildActivityTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="hx.wardriver.hayos.MainActivity" />
+                android:value="net.wigle.wigleandroid.MainActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="hx.wardriver.hayos" />
+                <data android:scheme="droid.wardriver.hx.os" />
             </intent-filter>
         </activity>
         <activity
@@ -174,7 +174,7 @@
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="hx.wardriver.hayos.register" />
+                <data android:scheme="droid.wardriver.hx.os.register" />
             </intent-filter>
         </activity>
         <activity
@@ -213,11 +213,11 @@
             android:theme="@style/ChildActivityTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="hx.wardriver.hayos.MacFilterActivity" />
+                android:value="net.wigle.wigleandroid.MacFilterActivity" />
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
-                <data android:scheme="hx.wardriver.hayos" />
+                <data android:scheme="droid.wardriver.hx.os" />
             </intent-filter>
         </activity>
         <activity
@@ -345,24 +345,24 @@
             android:exported="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
-                <action android:name="hx.wardriver.hayos.END" />
+                <action android:name="droid.wardriver.hx.os.END" />
             </intent-filter>
         </receiver>
         <receiver android:name=".listener.UploadReceiver"
             android:exported="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
-                <action android:name="hx.wardriver.hayos.UPLOAD" />
+                <action android:name="droid.wardriver.hx.os.UPLOAD" />
             </intent-filter>
         </receiver>
         <receiver android:name=".listener.ScanControlReceiver"
             android:exported="true"
             tools:ignore="ExportedReceiver">
             <intent-filter>
-                <action android:name="hx.wardriver.hayos.SCAN" />
+                <action android:name="droid.wardriver.hx.os.SCAN" />
             </intent-filter>
             <intent-filter>
-                <action android:name="hx.wardriver.hayos.PAUSE" />
+                <action android:name="droid.wardriver.hx.os.PAUSE" />
             </intent-filter>
         </receiver>
         <receiver

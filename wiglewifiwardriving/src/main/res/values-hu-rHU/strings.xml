@@ -445,7 +445,7 @@
     <string name="login_title">Bejelentkezés Szükséges</string>
     <string name="login_required">Ehhez be kell jelentkeznie. Kérjük, jelentkezzen be, vagy hozzon létre fiókot, ha szükséges.</string>
     <string name="login">Belépés</string>
-    <string name="registration_html_prompt">&lt;a href=\'hx.wardriver.hayos.register://register\'>Regisztráció&lt;/a&gt; @WiGLE.net vagy &lt;a href=\'hx.wardriver.hayos://activate\'&gt;aktiválás most QR-kóddal&lt;/a&gt;</string>
+    <string name="registration_html_prompt">&lt;a href=\'net.wigle.wigleandroid.register://register\'>Regisztráció&lt;/a&gt; @WiGLE.net vagy &lt;a href=\'net.wigle.wigleandroid://activate\'&gt;aktiválás most QR-kóddal&lt;/a&gt;</string>
     <string name="ble_services">BLE UUID-ok:</string>
     <string name="ble_vendor">BLE szállítói azonosító:</string>
     <string name="speech_new_bt">Új bluetooth a DB-hez</string>
