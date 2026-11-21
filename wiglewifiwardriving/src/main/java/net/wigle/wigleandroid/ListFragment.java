@@ -843,6 +843,14 @@ public final class ListFragment extends Fragment implements ApiListener, DialogL
                 }
             });
         }
+
+        final androidx.appcompat.widget.SwitchCompat autoSwitch = view.findViewById(R.id.auto_upload_switch);
+        if (null != autoSwitch && null != prefs) {
+            autoSwitch.setChecked(prefs.getBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, false));
+            autoSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
+                prefs.edit().putBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, isChecked).apply();
+            });
+        }
     }
 
     private void setRunDistUI(final View view, final SharedPreferences prefs) {

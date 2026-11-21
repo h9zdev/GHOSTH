@@ -67,8 +67,59 @@ public final class WigleService extends Service {
             while ( ! done.get() ) {
                 MainActivity.sleep( 15000L );
                 setupNotification();
+                checkAutoUpload();
             }
             Logging.info("GuardThread done");
+        }
+    }
+
+    private long lastAutoUploadTime = 0;
+    private static final long AUTO_UPLOAD_INTERVAL_MS = 5 * 60 * 1000L; // 5 minutes
+
+    private void checkAutoUpload() {
+        try {
+            final Context context = getApplicationContext();
+            if (context == null) return;
+            final SharedPreferences prefs = context.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
+            final boolean autoUploadEnabled = prefs.getBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, false);
+            if (!autoUploadEnabled) {
+                return;
+            }
+
+            final long now = System.currentTimeMillis();
+            if (lastAutoUploadTime == 0) {
+                lastAutoUploadTime = prefs.getLong(PreferenceKeys.PREF_LAST_AUTO_UPLOAD_TIME, now);
+            }
+
+            if (now - lastAutoUploadTime >= AUTO_UPLOAD_INTERVAL_MS) {
+                final MainActivity ma = MainActivity.getMainActivity();
+                if (ma != null && !ma.isTransferring()) {
+                    final long marker = prefs.getLong(PreferenceKeys.PREF_DB_MARKER, 0L);
+                    long maxId = prefs.getLong(PreferenceKeys.PREF_MAX_DB, 0L);
+                    if (ListFragment.lameStatic.dbHelper != null) {
+                        final long currentLocCount = ListFragment.lameStatic.dbHelper.getLocationCount();
+                        if (currentLocCount > maxId) {
+                            maxId = currentLocCount;
+                        }
+                    }
+                    if (maxId > marker) {
+                        Logging.info("Auto-upload (5m): " + (maxId - marker) + " observations pending. Triggering upload.");
+                        lastAutoUploadTime = now;
+                        prefs.edit().putLong(PreferenceKeys.PREF_LAST_AUTO_UPLOAD_TIME, now).apply();
+                        ma.runOnUiThread(() -> {
+                            if (!ma.isTransferring()) {
+                                ma.backgroundUploadFile();
+                            }
+                        });
+                    } else {
+                        lastAutoUploadTime = now;
+                        prefs.edit().putLong(PreferenceKeys.PREF_LAST_AUTO_UPLOAD_TIME, now).apply();
+                        Logging.info("Auto-upload check: no new observations since marker " + marker);
+                    }
+                }
+            }
+        } catch (final Exception ex) {
+            Logging.error("Error in checkAutoUpload: " + ex, ex);
         }
     }
 

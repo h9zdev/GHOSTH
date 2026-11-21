@@ -17,6 +17,8 @@ public class PreferenceKeys {
     public static final String PREF_MAX_DB = "maxDbMarker";
     public static final String PREF_ROUTE_DB_RUN = "routeDbRun";
     public static final String PREF_NETS_UPLOADED = "netsUploaded";
+    public static final String PREF_AUTO_UPLOAD = "autoUpload";
+    public static final String PREF_LAST_AUTO_UPLOAD_TIME = "lastAutoUploadTime";
     public static final String PREF_SCAN_PERIOD_STILL = "scanPeriodStill";
     public static final String PREF_SCAN_PERIOD = "scanPeriod";
     public static final String PREF_SCAN_PERIOD_FAST = "scanPeriodFast";

@@ -151,6 +151,15 @@
             android:layout_weight="0"
             android:background="@drawable/upload_button"
             android:text="@string/upload_button" />
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/auto_upload_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="6dp"
+            android:layout_weight="0"
+            android:text="@string/auto_upload_switch_label"
+            android:textSize="12sp" />
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="match_parent"

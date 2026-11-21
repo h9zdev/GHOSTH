@@ -530,6 +530,31 @@ public final class DataFragment extends Fragment implements DialogListener {
             }
         });
 
+        final Button uploadBtn = view.findViewById(R.id.data_upload_button);
+        if (uploadBtn != null) {
+            MainActivity main = MainActivity.getMainActivity();
+            if (main != null && main.isTransferring()) {
+                uploadBtn.setEnabled(false);
+            } else {
+                uploadBtn.setEnabled(true);
+            }
+            uploadBtn.setOnClickListener(v -> {
+                MainActivity m = MainActivity.getMainActivity();
+                if (m != null && !m.isTransferring()) {
+                    m.backgroundUploadFile();
+                }
+            });
+        }
+
+        final androidx.appcompat.widget.SwitchCompat autoSwitch = view.findViewById(R.id.data_auto_upload_switch);
+        if (autoSwitch != null && prefs != null) {
+            final SharedPreferences finalPrefs = prefs;
+            autoSwitch.setChecked(finalPrefs.getBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, false));
+            autoSwitch.setOnCheckedChangeListener((btn, isChecked) -> {
+                finalPrefs.edit().putBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, isChecked).apply();
+            });
+        }
+
     }
 
     private void setupGpxExport( final View view ) {

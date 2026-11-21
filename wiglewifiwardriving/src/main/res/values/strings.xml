@@ -2,8 +2,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="empty"></string>
     <string name="stats">Starting</string>
-    <string name="app_name">WiGLE WiFi Wardriving</string>
-    <string name="list_app_name">WiGLE WiFi</string>
+    <string name="app_name">GhostH</string>
+    <string name="list_app_name">GhostH</string>
     <string name="settings_app_name">Settings</string>
     <string name="mapping_app_name">Map</string>
     <string name="dashboard_app_name">Dashboard</string>
@@ -13,6 +13,10 @@
     <string name="data_activity_name">Database</string>
     <string name="dbresult_activity_name">Search Result</string>
     <string name="upload_button">Upload to\nWiGLE.net</string>
+    <string name="data_upload_button">Upload to WiGLE.net</string>
+    <string name="auto_upload_switch_label">Auto (5m)</string>
+    <string name="auto_upload_text">Auto-upload every 5 minutes</string>
+    <string name="auto_upload_explain">Save observations to local file and upload to WiGLE.net every 5 minutes while active</string>
     <string name="username">WiGLE username</string>
     <string name="password">WiGLE password</string>
     <string name="show_current">Show current networks only</string>

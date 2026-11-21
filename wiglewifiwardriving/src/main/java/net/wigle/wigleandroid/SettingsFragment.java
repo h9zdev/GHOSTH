@@ -312,6 +312,15 @@ public final class SettingsFragment extends Fragment implements DialogListener {
             }
         });
 
+        final CheckBox autoUpload = view.findViewById(R.id.auto_upload);
+        if (autoUpload != null) {
+            autoUpload.setChecked(prefs.getBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, false));
+            autoUpload.setOnCheckedChangeListener((buttonView, isChecked) -> {
+                editor.putBoolean(PreferenceKeys.PREF_AUTO_UPLOAD, isChecked);
+                editor.apply();
+            });
+        }
+
         final TextView scanThrottleHelp = view.findViewById(R.id.scan_throttle_help);
         if (Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
             scanThrottleHelp.setText(R.string.pie_bad);
