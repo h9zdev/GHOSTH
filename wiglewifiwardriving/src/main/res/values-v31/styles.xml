@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Theme.AppCompat.DayNight">
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:windowSplashScreenBackground">#000000</item>
+    </style>
     <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
-        <item name="android:textColor">#00fff2</item>
-        <item name="android:textColorPrimary">#00fff2</item>
-        <item name="android:textColorSecondary">#00a8a0</item>
+        <item name="android:textColor">@color/cyber_cyan</item>
+        <item name="android:textColorPrimary">@color/cyber_cyan</item>
+        <item name="android:textColorSecondary">@color/cyber_dim_cyan</item>
         <item name="android:colorBackground">#000000</item>
         <item name="android:windowBackground">#000000</item>
         <item name="android:windowSplashScreenBackground">#000000</item>
@@ -19,4 +24,3 @@
         <item name="android:fontFamily">@font/share_tech_mono</item>
     </style>
 </resources>
-
