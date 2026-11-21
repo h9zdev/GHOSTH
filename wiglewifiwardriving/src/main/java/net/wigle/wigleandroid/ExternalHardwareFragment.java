@@ -1,5 +1,6 @@
 package net.wigle.wigleandroid;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -13,22 +14,20 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
 
 import net.wigle.wigleandroid.external.ExternalHardwareManager;
-import net.wigle.wigleandroid.ml.AdvancedEvilTwinDetector;
-import net.wigle.wigleandroid.ml.OnDeviceMLInference;
-import net.wigle.wigleandroid.model.Network;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Locale;
 
 /**
- * Fragment for configuring External Hardware (ESP32 sniffer, Pi/Kali monitor, RTL-SDR)
- * and triggering On-Device ML threat evaluation.
+ * Fragment dedicated strictly to External Hardware:
+ * - ESP32 Promiscuous Sniffer (Bluetooth SPP & Serial stream)
+ * - Raspberry Pi / Kali Companion (TCP stream for Kismet/airodump/gpsd)
+ * - RTL-SDR stream (rtl_tcp)
+ * - Stealth Passive Capture Mode switch
+ * - Real-time hardware telemetry log
  */
 public class ExternalHardwareFragment extends Fragment {
 
@@ -44,10 +43,10 @@ public class ExternalHardwareFragment extends Fragment {
     private EditText editPiPort;
     private Button btnConnectPi;
 
-    private TextView mlInferencesCount;
-    private TextView mlAnomaliesCount;
-    private TextView mlEvilTwinsCount;
-    private Button btnRunMlEval;
+    private TextView sdrStatusBadge;
+    private Button btnConnectSdr;
+
+    private TextView hardwareTelemetryLog;
 
     private final Handler handler = new Handler(Looper.getMainLooper());
     private boolean isRunning = false;
@@ -78,10 +77,10 @@ public class ExternalHardwareFragment extends Fragment {
         editPiPort = view.findViewById(R.id.edit_pi_port);
         btnConnectPi = view.findViewById(R.id.btn_connect_pi);
 
-        mlInferencesCount = view.findViewById(R.id.ml_inferences_count);
-        mlAnomaliesCount = view.findViewById(R.id.ml_anomalies_count);
-        mlEvilTwinsCount = view.findViewById(R.id.ml_eviltwins_count);
-        btnRunMlEval = view.findViewById(R.id.btn_run_ml_eval);
+        sdrStatusBadge = view.findViewById(R.id.sdr_status_badge);
+        btnConnectSdr = view.findViewById(R.id.btn_connect_sdr);
+
+        hardwareTelemetryLog = view.findViewById(R.id.hardware_telemetry_log);
 
         // Passive Capture Mode
         switchPassiveCapture.setChecked(hardwareManager.isPassiveCaptureOnly());
@@ -90,15 +89,18 @@ public class ExternalHardwareFragment extends Fragment {
             Toast.makeText(getContext(), isChecked
                     ? "Passive Capture Enabled (Stealth Monitor Mode)"
                     : "Active Scanning Enabled", Toast.LENGTH_SHORT).show();
+            appendLog(isChecked ? "[STEALTH] Passive monitor mode enabled." : "[ACTIVE] Wi-Fi active broadcast probes enabled.");
         });
 
         // ESP32 Bluetooth SPP
         btnConnectEsp32.setOnClickListener(v -> {
             btnConnectEsp32.setEnabled(false);
+            appendLog("[ESP32] Initiating Bluetooth SPP connection...");
             hardwareManager.connectEsp32Bluetooth(null, (success, message) -> {
                 handler.post(() -> {
                     btnConnectEsp32.setEnabled(true);
                     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[ESP32] " + message);
                     updateStatusUi();
                 });
             });
@@ -115,18 +117,31 @@ public class ExternalHardwareFragment extends Fragment {
             } catch (Exception ignored) {
             }
 
+            final String fHost = host;
+            final int fPort = port;
             btnConnectPi.setEnabled(false);
+            appendLog(String.format(Locale.US, "[PI/KALI] Connecting to TCP %s:%d...", fHost, fPort));
             hardwareManager.connectPiKali(host, port, (success, message) -> {
                 handler.post(() -> {
                     btnConnectPi.setEnabled(true);
                     Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[PI/KALI] " + message);
                     updateStatusUi();
                 });
             });
         });
 
-        // Run On-Device ML Evaluation
-        btnRunMlEval.setOnClickListener(v -> runFullMlEvaluation());
+        // RTL-SDR stream
+        btnConnectSdr.setOnClickListener(v -> {
+            appendLog("[RTL-SDR] Connecting to rtl_tcp localhost:1234...");
+            hardwareManager.connectRtlSdr("127.0.0.1", 1234, (success, message) -> {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[RTL-SDR] " + message);
+                    updateStatusUi();
+                });
+            });
+        });
 
         return view;
     }
@@ -146,69 +161,32 @@ public class ExternalHardwareFragment extends Fragment {
     }
 
     private void updateStatusUi() {
-        if (hardwareManager == null) return;
+        if (!isAdded()) return;
 
-        // ESP32 Status
-        boolean esp32Online = hardwareManager.isEsp32Connected();
-        esp32StatusBadge.setText(esp32Online ? "[ONLINE & SNIFFING]" : "[OFFLINE]");
-        esp32StatusBadge.setTextColor(getResources().getColor(
-                esp32Online ? R.color.cyber_green : R.color.cyber_pink));
-        btnConnectEsp32.setText(esp32Online ? "DISCONNECT ESP32" : "CONNECT BLUETOOTH SPP");
-        esp32PacketCount.setText(String.format(Locale.US, "PACKETS: %d", hardwareManager.getPacketsReceived()));
+        // Update ESP32
+        boolean esp32Connected = hardwareManager.isEsp32Connected();
+        esp32StatusBadge.setText(esp32Connected ? "CONNECTED" : "DISCONNECTED");
+        esp32StatusBadge.setTextColor(esp32Connected ? Color.parseColor("#00FF66") : Color.parseColor("#FF1F8F"));
+        esp32PacketCount.setText(String.format(Locale.US, "Packets: %d", hardwareManager.getEsp32PacketsReceived()));
 
-        // Pi/Kali Status
-        boolean piOnline = hardwareManager.isPiConnected();
-        piStatusBadge.setText(piOnline ? "[STREAMING ACTIVE]" : "[OFFLINE]");
-        piStatusBadge.setTextColor(getResources().getColor(
-                piOnline ? R.color.cyber_green : R.color.cyber_pink));
-        btnConnectPi.setText(piOnline ? "DISCONNECT" : "CONNECT");
+        // Update Pi / Kali
+        boolean piConnected = hardwareManager.isPiConnected();
+        piStatusBadge.setText(piConnected ? "CONNECTED" : "OFFLINE");
+        piStatusBadge.setTextColor(piConnected ? Color.parseColor("#00FF66") : Color.parseColor("#FF1F8F"));
 
-        // ML Counters
-        mlInferencesCount.setText(String.format(Locale.US, "INFERENCES: %d", OnDeviceMLInference.getTotalInferences()));
-        mlAnomaliesCount.setText(String.format(Locale.US, "ANOMALIES: %d", OnDeviceMLInference.getAnomaliesDetected()));
-        mlEvilTwinsCount.setText(String.format(Locale.US, "EVIL-TWINS: %d", OnDeviceMLInference.getEvilTwinsDetected()));
+        // Update RTL-SDR
+        boolean sdrConnected = hardwareManager.isSdrConnected();
+        sdrStatusBadge.setText(sdrConnected ? "STREAMING" : "STANDBY");
+        sdrStatusBadge.setTextColor(sdrConnected ? Color.parseColor("#00FF66") : Color.parseColor("#FFE600"));
     }
 
-    private void runFullMlEvaluation() {
-        Collection<Network> networks = MainActivity.getNetworkCache() != null
-                ? MainActivity.getNetworkCache().values() : null;
-
-        if (networks == null || networks.isEmpty()) {
-            Toast.makeText(getContext(), "No wireless transmitters in local cache to evaluate", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        int anomalies = 0;
-        for (Network net : networks) {
-            OnDeviceMLInference.FullInferenceResult res = OnDeviceMLInference.infer(net);
-            if (res.anomaly.isAnomalous) {
-                anomalies++;
+    private void appendLog(String message) {
+        if (hardwareTelemetryLog != null) {
+            String current = hardwareTelemetryLog.getText().toString();
+            if (current.length() > 2000) {
+                current = current.substring(current.length() - 1000);
             }
+            hardwareTelemetryLog.setText(current + "\n" + message);
         }
-
-        List<AdvancedEvilTwinDetector.EvilTwinFinding> findings = OnDeviceMLInference.evaluateEvilTwins(networks);
-        updateStatusUi();
-
-        // Display results alert dialog
-        StringBuilder sb = new StringBuilder();
-        sb.append(String.format(Locale.US, "Scanned Transmitters: %d\n", networks.size()));
-        sb.append(String.format(Locale.US, "Isolation Forest Anomalies Flagged: %d\n\n", anomalies));
-
-        if (!findings.isEmpty()) {
-            sb.append("=== EVIL-TWIN & ROGUE AP FINDINGS ===\n");
-            for (AdvancedEvilTwinDetector.EvilTwinFinding f : findings) {
-                sb.append(String.format(Locale.US, "[%s] SSID: %s (%d%% Confidence)\n%s\n\n",
-                        f.severity.getLabel(), f.ssid, f.confidencePercent, f.diagnostic));
-            }
-        } else {
-            sb.append("No rogue APs or evil-twin clones detected in immediate proximity.");
-        }
-
-        new AlertDialog.Builder(requireContext())
-                .setTitle("GhostH ML Intelligence Report")
-                .setMessage(sb.toString())
-                .setPositiveButton("OK", null)
-                .show();
     }
 }
-

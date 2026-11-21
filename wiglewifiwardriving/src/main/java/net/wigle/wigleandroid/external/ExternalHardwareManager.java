@@ -74,6 +74,14 @@ public class ExternalHardwareManager {
         return esp32Connected.get();
     }
 
+    public long getEsp32PacketsReceived() {
+        return packetsReceived.get();
+    }
+
+    public void connectRtlSdr(@NonNull final String host, final int port, final ConnectionCallback callback) {
+        connectSdr(host, port, callback);
+    }
+
     public boolean isPiConnected() {
         return piConnected.get();
     }

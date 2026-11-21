@@ -95,7 +95,8 @@ public class AdvancedEvilTwinDetector {
 
             for (Network n : list) {
                 bssids.add(n.getBssid());
-                channels.add(n.getChannel());
+                Integer ch = n.getChannel();
+                if (ch != null) channels.add(ch);
                 if (n.getBssid() != null && n.getBssid().length() >= 8) {
                     ouis.add(n.getBssid().substring(0, 8));
                 }

@@ -42,11 +42,12 @@ public class IsolationForestAnomalyDetector {
         double fRssi = (level > -30) ? 1.0 : (level < -92 ? 0.6 : 0.1);
 
         // 2. Channel Non-standardness
-        int channel = network.getChannel();
+        Integer chanObj = network.getChannel();
+        int channel = (chanObj != null) ? chanObj : 0;
         int freq = network.getFrequency();
         double fChannel = 0.0;
         if (freq < 3000) {
-            if (channel != 1 && channel != 6 && channel != 11) {
+            if (channel != 0 && channel != 1 && channel != 6 && channel != 11) {
                 fChannel = 0.6; // overlapping 2.4 GHz channel
             }
             if (channel > 14) fChannel = 1.0;

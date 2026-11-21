@@ -15,11 +15,10 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="// EXTERNAL HARDWARE &amp; ML SUITE"
+            android:text="// EXTERNAL RADIO HARDWARE"
             android:textColor="@color/cyber_cyan"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:fontFamily="@font/share_tech_mono"
             android:paddingBottom="6dp" />
 
         <!-- Stealth Passive Mode Card -->
@@ -27,7 +26,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:background="@drawable/cyber_card_bg"
+            android:background="@drawable/cyber_minimal_bg"
             android:padding="10dp"
             android:layout_marginBottom="8dp"
             android:gravity="center_vertical">
@@ -44,16 +43,14 @@
                     android:text="PASSIVE MONITOR ONLY"
                     android:textColor="@color/cyber_cyan"
                     android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Silent stealth sniffing (blocks active Wi-Fi probes)"
+                    android:text="Silent stealth sniffing (blocks active Wi-Fi broadcast probes)"
                     android:textColor="@color/cyber_dim_cyan"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textSize="11sp" />
             </LinearLayout>
 
             <androidx.appcompat.widget.SwitchCompat
@@ -67,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/cyber_card_bg"
+            android:background="@drawable/cyber_minimal_bg"
             android:padding="10dp"
             android:layout_marginBottom="8dp">
 
@@ -91,65 +88,52 @@
                     android:text="ESP32 PROMISCUOUS SNIFFER"
                     android:textColor="@color/cyber_cyan"
                     android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/esp32_status_badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[OFFLINE]"
+                    android:text="DISCONNECTED"
                     android:textColor="@color/cyber_pink"
                     android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Channel-hopping 802.11 beacon &amp; probe sniffer over Bluetooth/USB."
+                android:text="Ingests raw beacon &amp; probe request frames streamed over Bluetooth SPP or USB Serial."
                 android:textColor="@color/cyber_dim_cyan"
                 android:textSize="11sp"
-                android:fontFamily="@font/share_tech_mono"
-                android:paddingTop="3dp"
-                android:paddingBottom="6dp" />
+                android:paddingTop="3dp" />
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/esp32_packet_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Packets: 0 | Channel: --"
+                android:textColor="@color/cyber_yellow"
+                android:textSize="11sp"
+                android:paddingTop="2dp" />
+
+            <Button
+                android:id="@+id/btn_connect_esp32"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <Button
-                    android:id="@+id/btn_connect_esp32"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:background="@drawable/upload_button"
-                    android:text="CONNECT BLUETOOTH SPP"
-                    android:textColor="@color/cyber_cyan"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono" />
-
-                <TextView
-                    android:id="@+id/esp32_packet_count"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:gravity="end"
-                    android:textColor="@color/cyber_green"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:text="PACKETS: 0" />
-            </LinearLayout>
+                android:layout_marginTop="6dp"
+                android:text="CONNECT ESP32 BLUETOOTH SPP"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
         </LinearLayout>
 
-        <!-- Raspberry Pi / Kali Linux Companion Card -->
+        <!-- Pi / Kali Companion Card -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:background="@drawable/cyber_card_bg"
+            android:background="@drawable/cyber_minimal_bg"
             android:padding="10dp"
             android:layout_marginBottom="8dp">
 
@@ -159,159 +143,166 @@
                 android:orientation="horizontal"
                 android:gravity="center_vertical">
 
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_device_car"
+                    android:contentDescription="Pi / Kali" />
+
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="PI / KALI MONITOR COMPANION"
+                    android:paddingStart="8dp"
+                    android:text="PI / KALI MONITOR STREAM"
                     android:textColor="@color/cyber_cyan"
                     android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textStyle="bold" />
 
                 <TextView
                     android:id="@+id/pi_status_badge"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="[OFFLINE]"
+                    android:text="OFFLINE"
                     android:textColor="@color/cyber_pink"
                     android:textSize="11sp"
-                    android:textStyle="bold"
-                    android:fontFamily="@font/share_tech_mono" />
+                    android:textStyle="bold" />
             </LinearLayout>
 
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ingests monitor-mode airodump / Kismet streams &amp; gpsd socket."
+                android:text="Network stream from Kismet / airodump-ng / gpsd on companion Pi or Kali Linux rig."
                 android:textColor="@color/cyber_dim_cyan"
                 android:textSize="11sp"
-                android:fontFamily="@font/share_tech_mono"
-                android:paddingTop="3dp"
-                android:paddingBottom="6dp" />
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <EditText
-                    android:id="@+id/edit_pi_host"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="2"
-                    android:background="@drawable/cyber_card_bg"
-                    android:hint="192.168.4.1"
-                    android:textColorHint="@color/cyber_dim_cyan"
-                    android:textColor="@color/cyber_cyan"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:paddingHorizontal="6dp" />
-
-                <EditText
-                    android:id="@+id/edit_pi_port"
-                    android:layout_width="0dp"
-                    android:layout_height="36dp"
-                    android:layout_weight="1"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/cyber_card_bg"
-                    android:hint="2501"
-                    android:textColorHint="@color/cyber_dim_cyan"
-                    android:textColor="@color/cyber_cyan"
-                    android:textSize="12sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:paddingHorizontal="6dp" />
-
-                <Button
-                    android:id="@+id/btn_connect_pi"
-                    android:layout_width="wrap_content"
-                    android:layout_height="36dp"
-                    android:layout_marginStart="6dp"
-                    android:background="@drawable/upload_button"
-                    android:text="CONNECT"
-                    android:textColor="@color/cyber_cyan"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- On-Device ML Threat & Anomaly Intelligence Card -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="@drawable/cyber_card_bg"
-            android:padding="10dp"
-            android:layout_marginBottom="8dp">
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="ON-DEVICE ML THREAT &amp; ANOMALY ENGINE"
-                android:textColor="@color/cyber_cyan"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:fontFamily="@font/share_tech_mono" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Isolation Forest anomaly detection, WPS/IE fingerprinting &amp; Evil-Twin verification."
-                android:textColor="@color/cyber_dim_cyan"
-                android:textSize="11sp"
-                android:fontFamily="@font/share_tech_mono"
-                android:paddingTop="3dp"
-                android:paddingBottom="6dp" />
+                android:paddingTop="3dp" />
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:paddingVertical="4dp">
+                android:paddingTop="6dp">
 
-                <TextView
-                    android:id="@+id/ml_inferences_count"
+                <EditText
+                    android:id="@+id/edit_pi_host"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    android:layout_weight="2"
+                    android:hint="Host (192.168.4.1)"
                     android:textColor="@color/cyber_cyan"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:text="INFERENCES: 0" />
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textSize="12sp"
+                    android:background="@drawable/cyber_minimal_bg"
+                    android:padding="8dp" />
 
-                <TextView
-                    android:id="@+id/ml_anomalies_count"
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="1dp" />
+
+                <EditText
+                    android:id="@+id/edit_pi_port"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="@color/cyber_yellow"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:text="ANOMALIES: 0" />
-
-                <TextView
-                    android:id="@+id/ml_eviltwins_count"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:textColor="@color/cyber_pink"
-                    android:textSize="11sp"
-                    android:fontFamily="@font/share_tech_mono"
-                    android:text="EVIL-TWINS: 0" />
+                    android:hint="Port (2501)"
+                    android:inputType="number"
+                    android:textColor="@color/cyber_cyan"
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textSize="12sp"
+                    android:background="@drawable/cyber_minimal_bg"
+                    android:padding="8dp" />
             </LinearLayout>
 
             <Button
-                android:id="@+id/btn_run_ml_eval"
+                android:id="@+id/btn_connect_pi"
                 android:layout_width="match_parent"
-                android:layout_height="36dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:background="@drawable/upload_button"
-                android:text="RUN FULL ML THREAT EVALUATION"
+                android:text="CONNECT PI / KALI COMPANION"
                 android:textColor="@color/cyber_cyan"
-                android:textSize="11sp"
-                android:fontFamily="@font/share_tech_mono" />
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
         </LinearLayout>
 
+        <!-- RTL-SDR Stream Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_device_tv"
+                    android:contentDescription="SDR" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="8dp"
+                    android:text="RTL-SDR EXTRA-BAND STREAM"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/sdr_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="STANDBY"
+                    android:textColor="@color/cyber_yellow"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Connects to rtl_tcp daemon for extra ISM/sub-GHz monitoring (433MHz, 868MHz, 915MHz)."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+
+            <Button
+                android:id="@+id/btn_connect_sdr"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="CONNECT RTL-SDR (rtl_tcp:1234)"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+
+        <!-- Hardware Telemetry Log -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="HARDWARE TELEMETRY LOG"
+            android:textColor="@color/cyber_dim_cyan"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/hardware_telemetry_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="100dp"
+            android:background="#05070E"
+            android:padding="8dp"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="11sp"
+            android:text="// Hardware bus ready.\n// Select ESP32, Pi/Kali, or RTL-SDR companion to stream RF data." />
     </LinearLayout>
 </ScrollView>
-

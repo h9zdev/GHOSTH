@@ -486,6 +486,17 @@ public final class SettingsFragment extends Fragment implements DialogListener {
             Logging.error("unable to create registration prompt from HTML");
         }
 
+        final View qrScanBtn = view.findViewById(R.id.btn_scan_qr_login);
+        if (qrScanBtn != null) {
+            qrScanBtn.setOnClickListener(v -> {
+                final androidx.fragment.app.FragmentActivity act = getActivity();
+                if (act != null) {
+                    Intent intent = new Intent(act, ActivateActivity.class);
+                    act.startActivity(intent);
+                }
+            });
+        }
+
         user.setText( prefs.getString( PreferenceKeys.PREF_USERNAME, "" ) );
         user.addTextChangedListener( new SetWatcher() {
             @Override

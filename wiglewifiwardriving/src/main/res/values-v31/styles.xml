@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="AppTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:textColor">#00fff2</item>
+        <item name="android:textColorPrimary">#00fff2</item>
+        <item name="android:textColorSecondary">#00a8a0</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:windowSplashScreenBackground">#000000</item>
+        <item name="colorControlNormal">#00fff2</item>
+        <item name="colorControlActivated">#ff1f8f</item>
+        <item name="colorAccent">#ff1f8f</item>
+        <item name="colorPrimary">#050508</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorNavigationItemSelected">#00fff2</item>
+        <item name="colorNavigationItem">#0d0e15</item>
+        <item name="scrimBackground">#dd050508</item>
+        <item name="fontFamily">@font/share_tech_mono</item>
+        <item name="android:fontFamily">@font/share_tech_mono</item>
+    </style>
+</resources>
+

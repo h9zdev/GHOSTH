@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingVertical="5dp"
-    android:paddingHorizontal="4dp"
-    android:background="@drawable/cyber_card_bg"
+    android:paddingVertical="6dp"
+    android:paddingHorizontal="6dp"
+    android:background="@drawable/cyber_minimal_bg"
     android:layout_marginBottom="3dp">
 
     <LinearLayout
@@ -30,7 +30,6 @@
             android:textColor="@color/cyber_pink"
             android:textSize="11sp"
             android:textStyle="bold"
-            android:fontFamily="@font/share_tech_mono"
             tools:text="[FLOCK]" />
 
         <TextView
@@ -43,7 +42,6 @@
             android:textSize="12sp"
             android:ellipsize="end"
             android:maxLines="1"
-            android:fontFamily="@font/share_tech_mono"
             tools:text="Falcon_Cam_01" />
 
         <TextView
@@ -53,7 +51,6 @@
             android:textColor="@color/cyber_green"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:fontFamily="@font/share_tech_mono"
             tools:text="-64 dBm" />
     </LinearLayout>
 
@@ -70,7 +67,6 @@
             android:layout_weight="1"
             android:textColor="@color/cyber_dim_cyan"
             android:textSize="10sp"
-            android:fontFamily="@font/share_tech_mono"
             tools:text="00:20:A6:44:11:22" />
 
         <TextView
@@ -79,8 +75,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/cyber_dim_cyan"
             android:textSize="10sp"
-            android:fontFamily="@font/share_tech_mono"
             tools:text="WPA2 [ESS]" />
     </LinearLayout>
 </LinearLayout>
-

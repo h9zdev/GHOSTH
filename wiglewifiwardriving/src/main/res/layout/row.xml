@@ -69,6 +69,7 @@
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
 				android:textColor="@color/colorListSsidText"
+				android:fontFamily="sans-serif"
 				tools:text="WiFi Network"
 				android:paddingEnd="5sp"
 				android:paddingStart="0dp"
@@ -87,6 +88,7 @@
 					android:scrollHorizontally="true"
 					android:ellipsize="end"
 					android:maxLines="1"
+					android:fontFamily="sans-serif"
 					style="@style/ListOui"
 					android:layout_weight="1"
 					android:gravity="end"
@@ -96,6 +98,7 @@
 					android:id="@+id/time"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
+					android:fontFamily="sans-serif"
 					style="@style/ListTimestamp"
 					android:gravity="end"
 					tools:text="12:34:56"/>
@@ -110,6 +113,7 @@
 				android:id="@+id/level_string"
 				android:layout_width="wrap_content"
 				android:layout_height="wrap_content"
+				android:fontFamily="sans-serif"
 				tools:text="-69"
 				android:minWidth="24dp"
 				android:paddingEnd="0dp"
@@ -123,6 +127,7 @@
 				android:gravity="start"
 				android:paddingStart="2dp"
 				android:paddingEnd="8dp"
+				android:fontFamily="sans-serif"
 				style="@style/ListDetail"
 				tools:text="00:00:00:00:00:00"/>
 			<TextView
@@ -131,6 +136,7 @@
 				android:layout_height="match_parent"
 				android:gravity="start|bottom"
 				android:textSize="13sp"
+				android:fontFamily="sans-serif"
 				style="@style/ListFreq"
 				tools:text="5888MHz" />
 			<TextView android:id="@+id/detail"
@@ -139,6 +145,7 @@
 				android:layout_gravity="end"
 				android:gravity="end"
 				android:textAlignment="viewEnd"
+				android:fontFamily="sans-serif"
 				style="@style/ListDetail"
 				tools:text="[WPA2][RSN][ESS][WPS]"/>
 		</LinearLayout>

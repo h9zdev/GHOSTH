@@ -101,8 +101,9 @@ public class WirelessAnalytics {
         for (Network net : networks) {
             if (net == null || net.getType() != NetworkType.WIFI) continue;
             int freq = net.getFrequency();
-            int channel = net.getChannel();
-            if (channel <= 0) continue;
+            Integer chanObj = net.getChannel();
+            if (chanObj == null || chanObj <= 0) continue;
+            int channel = chanObj;
 
             int current = report.channelCounts.containsKey(channel) ? report.channelCounts.get(channel) : 0;
             report.channelCounts.put(channel, current + 1);

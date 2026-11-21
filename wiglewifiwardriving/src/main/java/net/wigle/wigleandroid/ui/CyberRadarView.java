@@ -105,28 +105,28 @@ public class CyberRadarView extends View {
 
     private void init() {
         ringPaint.setStyle(Paint.Style.STROKE);
-        ringPaint.setStrokeWidth(1.5f);
-        ringPaint.setColor(Color.parseColor("#1A3A40")); // Deep cyber cyan ring
+        ringPaint.setStrokeWidth(0.8f);
+        ringPaint.setColor(Color.parseColor("#122A30")); // Subtle minimal ring
 
         crosshairPaint.setStyle(Paint.Style.STROKE);
-        crosshairPaint.setStrokeWidth(1f);
-        crosshairPaint.setColor(Color.parseColor("#142E33"));
+        crosshairPaint.setStrokeWidth(0.6f);
+        crosshairPaint.setColor(Color.parseColor("#0D1E22"));
 
-        textPaint.setColor(Color.parseColor("#00FFF2"));
-        textPaint.setTextSize(26f);
-        textPaint.setTypeface(Typeface.MONOSPACE);
+        textPaint.setColor(Color.parseColor("#00A8A0"));
+        textPaint.setTextSize(22f);
+        textPaint.setTypeface(Typeface.SANS_SERIF);
 
         sweepBeamPaint.setStyle(Paint.Style.STROKE);
-        sweepBeamPaint.setStrokeWidth(2.5f);
+        sweepBeamPaint.setStrokeWidth(1.5f);
         sweepBeamPaint.setColor(Color.parseColor("#00FFF2"));
 
         blipPaint.setStyle(Paint.Style.FILL);
 
         blipGlowPaint.setStyle(Paint.Style.STROKE);
-        blipGlowPaint.setStrokeWidth(2f);
+        blipGlowPaint.setStrokeWidth(1.5f);
 
         lockPaint.setStyle(Paint.Style.STROKE);
-        lockPaint.setStrokeWidth(2.5f);
+        lockPaint.setStrokeWidth(2.0f);
         lockPaint.setColor(Color.parseColor("#FF1F8F")); // Neon Pink reticle
     }
 
@@ -232,19 +232,14 @@ public class CyberRadarView extends View {
         float[] ringRatios = {0.25f, 0.50f, 0.75f, 1.0f};
         String[] ringLabels = {"-45 dBm", "-65 dBm", "-80 dBm", "-95 dBm"};
 
+        ringPaint.setStrokeWidth(0.8f);
+        ringPaint.setColor(Color.parseColor("#122A30"));
         for (int i = 0; i < ringRatios.length; i++) {
             float r = maxRadius * ringRatios[i];
-            if (i == ringRatios.length - 1) {
-                ringPaint.setColor(Color.parseColor("#00FFF2"));
-                ringPaint.setStrokeWidth(2f);
-            } else {
-                ringPaint.setColor(Color.parseColor("#15383E"));
-                ringPaint.setStrokeWidth(1.2f);
-            }
             canvas.drawCircle(centerX, centerY, r, ringPaint);
 
             // Draw range label along the vertical axis
-            canvas.drawText(ringLabels[i], centerX + 8f, centerY - r + 24f, textPaint);
+            canvas.drawText(ringLabels[i], centerX + 8f, centerY - r + 20f, textPaint);
         }
 
         // Crosshairs: North-South, East-West
@@ -252,11 +247,11 @@ public class CyberRadarView extends View {
         canvas.drawLine(centerX, centerY - maxRadius, centerX, centerY + maxRadius, crosshairPaint);
 
         // Compass tick marks: N, E, S, W
-        textPaint.setColor(Color.parseColor("#00FFF2"));
-        canvas.drawText("000°", centerX - 26f, centerY - maxRadius - 10f, textPaint);
-        canvas.drawText("090°", centerX + maxRadius + 10f, centerY + 8f, textPaint);
-        canvas.drawText("180°", centerX - 26f, centerY + maxRadius + 28f, textPaint);
-        canvas.drawText("270°", centerX - maxRadius - 70f, centerY + 8f, textPaint);
+        textPaint.setColor(Color.parseColor("#00A8A0"));
+        canvas.drawText("000°", centerX - 24f, centerY - maxRadius - 8f, textPaint);
+        canvas.drawText("090°", centerX + maxRadius + 8f, centerY + 6f, textPaint);
+        canvas.drawText("180°", centerX - 24f, centerY + maxRadius + 24f, textPaint);
+        canvas.drawText("270°", centerX - maxRadius - 60f, centerY + 6f, textPaint);
     }
 
     private void drawSweepBeam(Canvas canvas) {

@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cyber_bg"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="// ON-DEVICE ML &amp; THREAT INTELLIGENCE"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:paddingBottom="6dp" />
+
+        <!-- ML Threat Overview Metrics (Minimal Card) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/cyber_minimal_bg"
+            android:paddingVertical="10dp"
+            android:paddingHorizontal="6dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/ml_inferences_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="148" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_dim_cyan"
+                    android:textSize="10sp"
+                    android:text="INFERENCES" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/ml_anomalies_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_yellow"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="4" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_dim_cyan"
+                    android:textSize="10sp"
+                    android:text="ANOMALIES" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:gravity="center">
+
+                <TextView
+                    android:id="@+id/ml_eviltwins_count"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    tools:text="1" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="@color/cyber_dim_cyan"
+                    android:textSize="10sp"
+                    android:text="EVIL-TWINS" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Isolation Forest Engine Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ISOLATION FOREST ANOMALY DETECTOR"
+                android:textColor="@color/cyber_cyan"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Evaluates new AP patterns: MAC address entropy, atypical channel hop anomalies, and rogue SSID signatures in real time."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+        </LinearLayout>
+
+        <!-- Multi-Vector Evil-Twin Detector Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="MULTI-VECTOR EVIL-TWIN DETECTOR"
+                android:textColor="@color/cyber_pink"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cross-correlates SSID duplicates against vendor OUI, channel divergence, and encryption cipher downgrade (Karma / rogue AP attacks)."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+        </LinearLayout>
+
+        <!-- Deep Device Fingerprinting Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="8dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="DEEP DEVICE FINGERPRINTING"
+                android:textColor="@color/cyber_yellow"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Fingerprints 802.11 Information Elements (HT/VHT/HE, WPS) and BLE manufacturer beacon payloads."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+        </LinearLayout>
+
+        <!-- Action Button: Run Evaluation -->
+        <Button
+            android:id="@+id/btn_run_ml_eval"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EXECUTE FULL ON-DEVICE ML EVALUATION"
+            android:textColor="@color/cyber_cyan"
+            android:backgroundTint="#0E1A2C"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            android:layout_marginBottom="8dp" />
+
+        <!-- Live Telemetry / Threat Log -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="THREAT TELEMETRY LOG"
+            android:textColor="@color/cyber_dim_cyan"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingBottom="4dp" />
+
+        <TextView
+            android:id="@+id/ml_telemetry_log"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="100dp"
+            android:background="#05070E"
+            android:padding="8dp"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="11sp"
+            android:text="// ML engine initialized and ready.\n// Ready to analyze wireless observations." />
+    </LinearLayout>
+</ScrollView>
+

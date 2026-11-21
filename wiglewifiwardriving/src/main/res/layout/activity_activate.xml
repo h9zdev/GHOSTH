@@ -4,14 +4,22 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     tools:context="net.wigle.wigleandroid.ActivateActivity">
+
     <androidx.camera.view.PreviewView
         android:id="@+id/camera_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-        />
+        android:layout_centerInParent="true" />
+
+    <!-- Centered Scanning Reticle Guide -->
+    <View
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_centerInParent="true"
+        android:background="@drawable/cyber_nav_header_bg" />
+
     <LinearLayout
         android:id="@+id/activate_back_layout"
         android:layout_width="wrap_content"
@@ -28,15 +36,19 @@
             android:src="?attr/homeAsUpIndicator"
             android:gravity="start"/>
     </LinearLayout>
+
     <TextView
+        android:id="@+id/activate_prompt_text"
         android:text="@string/setting_activate_prompt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_marginBottom="24dp"
-        android:layout_marginHorizontal="8dp"
-        android:textColor="@color/child_activity_background"
-        android:textSize="16sp" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="32dp"
+        android:layout_marginHorizontal="16dp"
+        android:background="#CC05070E"
+        android:padding="8dp"
+        android:gravity="center"
+        android:textColor="@color/cyber_cyan"
+        android:textSize="14sp" />
 </RelativeLayout>

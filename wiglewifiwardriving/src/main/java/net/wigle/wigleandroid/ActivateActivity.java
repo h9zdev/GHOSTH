@@ -98,15 +98,7 @@ public class ActivateActivity extends AppCompatActivity {
             backButton.setOnClickListener(v -> finish());
         }
 
-        Uri data = getIntent().getData();
-        //DEBUG Logging.info("intent data: "+data+" matches: "+
-        //        ActivateActivity.barcodeIntent.equals(data.toString()));
-        if (data != null && ActivateActivity.barcodeIntent.equals(data.toString())) {
-            launchBarcodeScanning();
-        } else {
-            Log.e(LOG_TAG, "intent data: "+data+" did not match "+ActivateActivity.barcodeIntent);
-            finish();
-        }
+        launchBarcodeScanning();
     }
 
     private void launchBarcodeScanning() {
@@ -163,24 +155,59 @@ public class ActivateActivity extends AppCompatActivity {
                     barcodeScanner.process(inputImage).addOnSuccessListener(
                             barcodes -> {
                                 if (!barcodes.isEmpty()) {
-                                    Logging.info("received detections");
+                                    Logging.info("received detections: " + barcodes.size());
                                     for (Barcode qr : barcodes) {
-                                        if (qr.getDisplayValue() != null && qr.getDisplayValue().matches("^.*:[a-zA-Z0-9]*:[a-zA-Z0-9]*$")) {
-                                            String[] tokens = qr.getDisplayValue().split(":");
+                                        String raw = qr.getDisplayValue();
+                                        if (raw == null) raw = qr.getRawValue();
+                                        if (raw == null) continue;
+                                        String clean = raw.trim();
+                                        Logging.info("Raw QR detected: " + clean);
+
+                                        if (clean.toLowerCase().startsWith("wigle://")) {
+                                            clean = clean.substring("wigle://".length());
+                                        } else if (clean.toLowerCase().startsWith("wigle:")) {
+                                            clean = clean.substring("wigle:".length());
+                                        }
+
+                                        String username = null;
+                                        String authname = null;
+                                        String token = null;
+
+                                        if (clean.contains(":")) {
+                                            String[] tokens = clean.split(":");
+                                            if (tokens.length >= 3) {
+                                                username = tokens[0].trim();
+                                                authname = tokens[1].trim();
+                                                token = tokens[2].trim();
+                                            }
+                                        }
+
+                                        if (username != null && !username.isEmpty() &&
+                                                authname != null && !authname.isEmpty() &&
+                                                token != null && !token.isEmpty()) {
+
                                             final MainActivity ma = MainActivity.getMainActivity();
+                                            final String finalUser = username;
                                             if (null != ma) {
                                                 final SharedPreferences prefs = ma.
                                                         getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
                                                 final SharedPreferences.Editor editor = prefs.edit();
-                                                editor.putString(PreferenceKeys.PREF_USERNAME, tokens[0]);
-                                                editor.putString(PreferenceKeys.PREF_AUTHNAME, tokens[1]);
+                                                editor.putString(PreferenceKeys.PREF_USERNAME, username);
+                                                editor.putString(PreferenceKeys.PREF_AUTHNAME, authname);
                                                 editor.putBoolean(PreferenceKeys.PREF_BE_ANONYMOUS, false);
                                                 editor.apply();
-                                                TokenAccess.setApiToken(prefs, tokens[2]);
+                                                TokenAccess.setApiToken(prefs, token);
                                                 MainActivity.refreshApiManager();
+
+                                                ma.runOnUiThread(() -> {
+                                                    android.widget.Toast.makeText(ma,
+                                                            "WiGLE Account Activated: " + finalUser,
+                                                            android.widget.Toast.LENGTH_LONG).show();
+                                                });
                                             }
                                             image.close();
                                             finish();
+                                            return;
                                         }
                                     }
                                 }

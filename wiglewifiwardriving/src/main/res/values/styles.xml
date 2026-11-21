@@ -4,7 +4,8 @@
         <item name="android:textColor">#00fff2</item>
         <item name="android:textColorPrimary">#00fff2</item>
         <item name="android:textColorSecondary">#00a8a0</item>
-        <item name="android:colorBackground">#050508</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:windowBackground">#000000</item>
         <item name="colorControlNormal">#00fff2</item>
         <item name="colorControlActivated">#ff1f8f</item>
         <item name="colorAccent">#ff1f8f</item>
@@ -121,34 +122,34 @@
     </style>
     <style name="ListOui" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#00a8a0</item>
-        <item name="fontFamily">@font/share_tech_mono</item>
-        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListTimestamp" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#00a8a0</item>
-        <item name="fontFamily">@font/share_tech_mono</item>
-        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListDetail" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#00fff2</item>
-        <item name="fontFamily">@font/share_tech_mono</item>
-        <item name="android:fontFamily">@font/share_tech_mono</item>
+        <item name="fontFamily">sans-serif</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListSsid" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#00fff2</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListFreq" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#00a8a0</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListBt" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#ffe600</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="ListDebug" parent="TextAppearance.AppCompat.Small">
         <item name="android:textColor">#ff1f8f</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="NewsTitleStyle" parent="TextAppearance.AppCompat">
         <item name="android:textSize">22sp</item>
@@ -194,16 +195,16 @@
     <style name="NetDetailSsid">
         <item name="android:textSize">26sp</item>
         <item name="android:textColor">#00fff2</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="NetDetailBssid">
         <item name="android:textSize">20sp</item>
         <item name="android:textColor">#ffe600</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
     <style name="NetDetailOui">
         <item name="android:textSize">16sp</item>
         <item name="android:textColor">#00a8a0</item>
-        <item name="android:fontFamily">monospace</item>
+        <item name="android:fontFamily">sans-serif</item>
     </style>
 </resources>
