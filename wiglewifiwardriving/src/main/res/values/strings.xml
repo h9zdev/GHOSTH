@@ -118,6 +118,7 @@
     <string name="tab_list">Network List</string>
     <string name="tab_map">Map</string>
     <string name="tab_radar">Radar</string>
+    <string name="tab_hardware">Hardware &amp; ML</string>
     <string name="radar_title">Cyber Threat Radar</string>
     <string name="tab_dash">Dashboard</string>
     <string name="tab_data">Database</string>

@@ -652,6 +652,10 @@ public class WifiReceiver extends BroadcastReceiver {
         boolean submitted = false;
 
         if (mainActivity.isScanning()) {
+            if (net.wigle.wigleandroid.external.ExternalHardwareManager.getInstance(mainActivity).isPassiveCaptureOnly()) {
+                // Stealth mode: Passive capture only; skip active startScan() broadcast probes
+                return true;
+            }
             if ( ! scanInFlight ) {
                 scanInFlight = true;
                 submitted = true;

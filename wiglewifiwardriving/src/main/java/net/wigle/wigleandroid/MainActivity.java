@@ -934,6 +934,7 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
         if (itemId == R.id.nav_list) return getString(R.string.list_app_name);
         if (itemId == R.id.nav_map) return getString(R.string.mapping_app_name);
         if (itemId == R.id.nav_radar) return getString(R.string.tab_radar);
+        if (itemId == R.id.nav_hardware) return getString(R.string.tab_hardware);
         if (itemId == R.id.nav_dash) return getString(R.string.dashboard_app_name);
         if (itemId == R.id.nav_data) return getString(R.string.data_activity_name);
         if (itemId == R.id.nav_search) return getString(R.string.tab_search);
@@ -979,6 +980,8 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             return ListFragment.class;
         } else if (navId == R.id.nav_radar) {
             return RadarFragment.class;
+        } else if (navId == R.id.nav_hardware) {
+            return ExternalHardwareFragment.class;
         } else if (navId == R.id.nav_dash) {
             return DashboardFragment.class;
         } else if (navId == R.id.nav_data) {

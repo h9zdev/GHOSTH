@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/cyber_bg"
+    android:padding="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Title Header -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="// EXTERNAL HARDWARE &amp; ML SUITE"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/share_tech_mono"
+            android:paddingBottom="6dp" />
+
+        <!-- Stealth Passive Mode Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@drawable/cyber_card_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp"
+            android:gravity="center_vertical">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="PASSIVE MONITOR ONLY"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/share_tech_mono" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Silent stealth sniffing (blocks active Wi-Fi probes)"
+                    android:textColor="@color/cyber_dim_cyan"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono" />
+            </LinearLayout>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/switch_passive_capture"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <!-- ESP32 Promiscuous Sniffer Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_card_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_device_iot"
+                    android:contentDescription="ESP32" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="8dp"
+                    android:text="ESP32 PROMISCUOUS SNIFFER"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/share_tech_mono" />
+
+                <TextView
+                    android:id="@+id/esp32_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[OFFLINE]"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/share_tech_mono" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Channel-hopping 802.11 beacon &amp; probe sniffer over Bluetooth/USB."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:fontFamily="@font/share_tech_mono"
+                android:paddingTop="3dp"
+                android:paddingBottom="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <Button
+                    android:id="@+id/btn_connect_esp32"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:background="@drawable/upload_button"
+                    android:text="CONNECT BLUETOOTH SPP"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono" />
+
+                <TextView
+                    android:id="@+id/esp32_packet_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@color/cyber_green"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:text="PACKETS: 0" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Raspberry Pi / Kali Linux Companion Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_card_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="PI / KALI MONITOR COMPANION"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/share_tech_mono" />
+
+                <TextView
+                    android:id="@+id/pi_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="[OFFLINE]"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:fontFamily="@font/share_tech_mono" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ingests monitor-mode airodump / Kismet streams &amp; gpsd socket."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:fontFamily="@font/share_tech_mono"
+                android:paddingTop="3dp"
+                android:paddingBottom="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <EditText
+                    android:id="@+id/edit_pi_host"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="2"
+                    android:background="@drawable/cyber_card_bg"
+                    android:hint="192.168.4.1"
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:paddingHorizontal="6dp" />
+
+                <EditText
+                    android:id="@+id/edit_pi_port"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/cyber_card_bg"
+                    android:hint="2501"
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="12sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:paddingHorizontal="6dp" />
+
+                <Button
+                    android:id="@+id/btn_connect_pi"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/upload_button"
+                    android:text="CONNECT"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- On-Device ML Threat & Anomaly Intelligence Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_card_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="ON-DEVICE ML THREAT &amp; ANOMALY ENGINE"
+                android:textColor="@color/cyber_cyan"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:fontFamily="@font/share_tech_mono" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Isolation Forest anomaly detection, WPS/IE fingerprinting &amp; Evil-Twin verification."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:fontFamily="@font/share_tech_mono"
+                android:paddingTop="3dp"
+                android:paddingBottom="6dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingVertical="4dp">
+
+                <TextView
+                    android:id="@+id/ml_inferences_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:text="INFERENCES: 0" />
+
+                <TextView
+                    android:id="@+id/ml_anomalies_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/cyber_yellow"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:text="ANOMALIES: 0" />
+
+                <TextView
+                    android:id="@+id/ml_eviltwins_count"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="11sp"
+                    android:fontFamily="@font/share_tech_mono"
+                    android:text="EVIL-TWINS: 0" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_run_ml_eval"
+                android:layout_width="match_parent"
+                android:layout_height="36dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/upload_button"
+                android:text="RUN FULL ML THREAT EVALUATION"
+                android:textColor="@color/cyber_cyan"
+                android:textSize="11sp"
+                android:fontFamily="@font/share_tech_mono" />
+        </LinearLayout>
+
+    </LinearLayout>
+</ScrollView>
+
