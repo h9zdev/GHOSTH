@@ -6,6 +6,16 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent">
     <LinearLayout
+        android:id="@+id/list_nav_header_container"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/cyber_nav_header_bg"
+        android:paddingHorizontal="4dp"
+        android:paddingTop="3dp"
+        android:paddingBottom="4dp"
+        android:layout_marginBottom="2dp">
+    <LinearLayout
         android:orientation="horizontal"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
@@ -320,6 +330,7 @@
             android:paddingStart="3dp"
             tools:text="DB Queue: 888"
 			/>
+    </LinearLayout>
     </LinearLayout>
     <LinearLayout
         android:orientation="horizontal"

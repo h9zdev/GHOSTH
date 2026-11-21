@@ -1095,7 +1095,7 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             state.mxcDbHelper = new MxcDatabaseHelper(getApplicationContext(), prefs);
         }
         final boolean histogramsEnabled = prefs.getBoolean(
-                PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, false);
+                PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, true);
         if (state.rssiHistoryCache == null) {
             state.rssiHistoryCache = new net.wigle.wigleandroid.util.RssiHistoryCache(histogramsEnabled);
         } else {

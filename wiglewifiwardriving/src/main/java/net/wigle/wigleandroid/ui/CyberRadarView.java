@@ -1,3 +1,4 @@
+
 package net.wigle.wigleandroid.ui;
 
 import android.content.Context;
@@ -51,7 +52,19 @@ public class CyberRadarView extends View {
             this.angleDeg = angleDeg;
             this.distanceRatio = distanceRatio;
             this.category = category;
-            this.color = category.getColor();
+            if (category.isSpecial()) {
+                this.color = category.getColor();
+            } else if (network.getType() == net.wigle.wigleandroid.model.NetworkType.BLE ||
+                    network.getType() == net.wigle.wigleandroid.model.NetworkType.BT) {
+                this.color = Color.parseColor("#3884FF"); // Electric Blue for Bluetooth
+            } else if (network.getType() == net.wigle.wigleandroid.model.NetworkType.GSM ||
+                    network.getType() == net.wigle.wigleandroid.model.NetworkType.CDMA ||
+                    network.getType() == net.wigle.wigleandroid.model.NetworkType.LTE ||
+                    network.getType() == net.wigle.wigleandroid.model.NetworkType.NR) {
+                this.color = Color.parseColor("#FF8800"); // Neon Amber for Cellular
+            } else {
+                this.color = Color.parseColor("#00FFF2"); // Neon Cyan for Wi-Fi
+            }
             this.lastSweepFlashTime = 0;
         }
     }
@@ -295,11 +308,25 @@ public class CyberRadarView extends View {
             blipGlowPaint.setColor(Color.argb(alphaInt, r, g, b));
 
             float blipRadius = target.category.isSpecial() ? 9f : 6f;
-            canvas.drawCircle(bx, by, blipRadius, blipPaint);
-
-            if (target.category.isSpecial() || isFlashing) {
-                float glowRadius = blipRadius + (isFlashing ? (12f * (1f - flashAlpha)) : 5f);
-                canvas.drawCircle(bx, by, glowRadius, blipGlowPaint);
+            if (target.network.getType() == net.wigle.wigleandroid.model.NetworkType.BLE ||
+                    target.network.getType() == net.wigle.wigleandroid.model.NetworkType.BT) {
+                // Diamond glyph for Bluetooth / BLE
+                Path diamond = new Path();
+                diamond.moveTo(bx, by - blipRadius * 1.3f);
+                diamond.lineTo(bx + blipRadius * 1.3f, by);
+                diamond.lineTo(bx, by + blipRadius * 1.3f);
+                diamond.lineTo(bx - blipRadius * 1.3f, by);
+                diamond.close();
+                canvas.drawPath(diamond, blipPaint);
+                if (isFlashing) {
+                    canvas.drawCircle(bx, by, blipRadius + (12f * (1f - flashAlpha)), blipGlowPaint);
+                }
+            } else {
+                canvas.drawCircle(bx, by, blipRadius, blipPaint);
+                if (target.category.isSpecial() || isFlashing) {
+                    float glowRadius = blipRadius + (isFlashing ? (12f * (1f - flashAlpha)) : 5f);
+                    canvas.drawCircle(bx, by, glowRadius, blipGlowPaint);
+                }
             }
         }
     }

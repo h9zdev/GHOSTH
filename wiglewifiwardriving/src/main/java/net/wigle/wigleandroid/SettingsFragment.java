@@ -560,7 +560,7 @@ public final class SettingsFragment extends Fragment implements DialogListener {
         if (null != thisActivity) {
             PrefsBackedCheckbox.prefBackedCheckBox(thisActivity, view, R.id.edit_showcurrent, PreferenceKeys.PREF_SHOW_CURRENT, true);
             PrefsBackedCheckbox.prefBackedCheckBox(thisActivity, view, R.id.display_inline_histograms,
-                    PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, false, value -> {
+                    PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, true, value -> {
                         final MainActivity.State s = MainActivity.getStaticState();
                         if (s != null && s.rssiHistoryCache != null) {
                             s.rssiHistoryCache.setEnabled(value);

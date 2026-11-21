@@ -28,7 +28,7 @@
     <color name="colorNavigationItemFg">#00fff2</color>
     <color name="colorNavigationItemSelectedFg">#050508</color>
     <color name="colorNavigationItemExitFg">#ffffff</color>
-    <color name="colorNavigationItemBorder">#ff1f8f</color>
+    <color name="colorNavigationItemBorder">#00000000</color>
     <color name="colorListSsidText">#00fff2</color>
 
     <color name="gpx_pressed_color">#121420</color>

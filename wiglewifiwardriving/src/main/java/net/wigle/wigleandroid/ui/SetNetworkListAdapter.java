@@ -23,6 +23,7 @@ import net.wigle.wigleandroid.ListFragment;
 import net.wigle.wigleandroid.MainActivity;
 import net.wigle.wigleandroid.R;
 import net.wigle.wigleandroid.classifier.AdvancedDeviceClassifier;
+import net.wigle.wigleandroid.classifier.DeviceTypeClassifier;
 import net.wigle.wigleandroid.model.Network;
 import net.wigle.wigleandroid.model.NetworkType;
 import net.wigle.wigleandroid.model.OUI;
@@ -247,16 +248,18 @@ public final class SetNetworkListAdapter extends AbstractListAdapter<Network> {
 
         holder.wepIcon.setImageResource(NetworkListUtil.getImage(network));
 
+        DeviceTypeClassifier.DeviceType dt = DeviceTypeClassifier.classify(network);
         if (NetworkType.BT.equals(network.getType()) || BLE.equals(network.getType())) {
             holder.btIcon.setVisibility(VISIBLE);
-            Integer btImageId = NetworkListUtil.getBtImage(network);
-            if (null == btImageId) {
-                holder.btIcon.setVisibility(GONE);
-            } else {
-                holder.btIcon.setImageResource(btImageId);
-                ImageViewCompat.setImageTintList(holder.btIcon, ColorStateList.valueOf(
-                        ContextCompat.getColor(getContext(), R.color.colorNavigationItemFg)));
-            }
+            holder.btIcon.setImageResource(dt.getIconRes());
+            ImageViewCompat.setImageTintList(holder.btIcon, null);
+        } else if (dt == DeviceTypeClassifier.DeviceType.CAM || dt == DeviceTypeClassifier.DeviceType.CAR ||
+                dt == DeviceTypeClassifier.DeviceType.TV || dt == DeviceTypeClassifier.DeviceType.HEADPHONE ||
+                dt == DeviceTypeClassifier.DeviceType.PHONE || dt == DeviceTypeClassifier.DeviceType.IOT ||
+                dt == DeviceTypeClassifier.DeviceType.TRACKER) {
+            holder.btIcon.setVisibility(VISIBLE);
+            holder.btIcon.setImageResource(dt.getIconRes());
+            ImageViewCompat.setImageTintList(holder.btIcon, null);
         } else {
             holder.btIcon.setVisibility(GONE);
         }
@@ -342,7 +345,7 @@ public final class SetNetworkListAdapter extends AbstractListAdapter<Network> {
         }
         final boolean show = !historical
                 && prefs != null
-                && prefs.getBoolean(PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, false);
+                && prefs.getBoolean(PreferenceKeys.PREF_DISPLAY_INLINE_LIST_SIGNAL_HISTOGRAMS, true);
         if (!show) {
             holder.histogramDrawable.clear();
             return;

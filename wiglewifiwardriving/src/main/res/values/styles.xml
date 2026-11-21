@@ -49,7 +49,7 @@
         <item name="android:fontFamily">@font/share_tech_mono</item>
     </style>
     <style name="DividerColor">
-        <item name="android:background">#ff1f8f</item>
+        <item name="android:background">#1A1D2E</item>
     </style>
     <style name="UploadColor" parent="TextAppearance.AppCompat">
         <item name="android:textColor">#ffe600</item>

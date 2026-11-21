@@ -149,6 +149,13 @@ public class FossMappingFragment extends AbstractMappingFragment {
                     final Activity activity = getActivity();
                     if (activity != null) {
                         mapRender = new FossMapRender(activity, mapLibreMap, false);
+                        if (MainActivity.getNetworkCache() != null) {
+                            for (Network net : MainActivity.getNetworkCache().values()) {
+                                if (net != null) {
+                                    mapRender.addItem(net);
+                                }
+                            }
+                        }
                     }
                     configureMapSettings(mapLibreMap, prefs, style);
                     setupLocationTracking(mapLibreMap, prefs, style);
@@ -165,6 +172,13 @@ public class FossMappingFragment extends AbstractMappingFragment {
                             final Activity activity = getActivity();
                             if (activity != null) {
                                 mapRender = new FossMapRender(activity, mapLibreMap, false);
+                                if (MainActivity.getNetworkCache() != null) {
+                                    for (Network net : MainActivity.getNetworkCache().values()) {
+                                        if (net != null) {
+                                            mapRender.addItem(net);
+                                        }
+                                    }
+                                }
                             }
                             configureMapSettings(mapLibreMap, prefs, style);
                             setupLocationTracking(mapLibreMap, prefs, style);
@@ -530,9 +544,15 @@ public class FossMappingFragment extends AbstractMappingFragment {
                                 }
                             });
                         }
-                    } else if ( previousLocation == null || previousLocation.getLatitude() != location.getLatitude()
-                            || previousLocation.getLongitude() != location.getLongitude()
-                            || previousRunNets != ListFragment.lameStatic.runNets) {
+                    }
+                    if (mapRender != null && MainActivity.getNetworkCache() != null) {
+                        for (Network net : MainActivity.getNetworkCache().values()) {
+                            if (net != null) {
+                                mapRender.addItem(net);
+                            }
+                        }
+                    }
+                    if (previousRunNets != ListFragment.lameStatic.runNets) {
                         // location or nets have changed, update the view
                         if (mapView != null) {
                             mapView.postInvalidate();

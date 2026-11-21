@@ -11,6 +11,7 @@ import net.wigle.wigleandroid.AbstractListAdapter;
 import net.wigle.wigleandroid.ListFragment;
 import net.wigle.wigleandroid.R;
 import net.wigle.wigleandroid.classifier.AdvancedDeviceClassifier;
+import net.wigle.wigleandroid.classifier.DeviceTypeClassifier;
 import net.wigle.wigleandroid.model.Network;
 import net.wigle.wigleandroid.model.NetworkType;
 import net.wigle.wigleandroid.model.OUI;
@@ -250,14 +251,16 @@ public final class NetworkListAdapter extends AbstractListAdapter<Network> {
         ico.setImageResource(NetworkListUtil.getImage(network));
 
         final ImageView btico = row.findViewById(R.id.bticon);
+        DeviceTypeClassifier.DeviceType dt = DeviceTypeClassifier.classify(network);
         if (NetworkType.BT.equals(network.getType()) || NetworkType.BLE.equals(network.getType())) {
             btico.setVisibility(View.VISIBLE);
-            Integer btImageId = NetworkListUtil.getBtImage(network);
-            if (null == btImageId) {
-                btico.setVisibility(View.GONE);
-            } else {
-                btico.setImageResource(btImageId);
-            }
+            btico.setImageResource(dt.getIconRes());
+        } else if (dt == DeviceTypeClassifier.DeviceType.CAM || dt == DeviceTypeClassifier.DeviceType.CAR ||
+                dt == DeviceTypeClassifier.DeviceType.TV || dt == DeviceTypeClassifier.DeviceType.HEADPHONE ||
+                dt == DeviceTypeClassifier.DeviceType.PHONE || dt == DeviceTypeClassifier.DeviceType.IOT ||
+                dt == DeviceTypeClassifier.DeviceType.TRACKER) {
+            btico.setVisibility(View.VISIBLE);
+            btico.setImageResource(dt.getIconRes());
         } else {
             btico.setVisibility(View.GONE);
         }

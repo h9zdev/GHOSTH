@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -14,8 +15,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import net.wigle.wigleandroid.analytics.WirelessAnalytics;
 import net.wigle.wigleandroid.classifier.AdvancedDeviceClassifier;
+import net.wigle.wigleandroid.classifier.DeviceTypeClassifier;
 import net.wigle.wigleandroid.model.Network;
+import net.wigle.wigleandroid.model.NetworkType;
 import net.wigle.wigleandroid.ui.CyberRadarView;
 
 import java.util.ArrayList;
@@ -37,6 +41,8 @@ public class RadarFragment extends Fragment {
     private TextView threatCountView;
     private TextView iotCountView;
     private TextView bleCountView;
+    private TextView securityScoreView;
+    private TextView bestChannelView;
 
     private View targetLockCard;
     private TextView lockCategoryView;
@@ -72,6 +78,8 @@ public class RadarFragment extends Fragment {
         threatCountView = view.findViewById(R.id.radar_threat_count);
         iotCountView = view.findViewById(R.id.radar_iot_count);
         bleCountView = view.findViewById(R.id.radar_ble_count);
+        securityScoreView = view.findViewById(R.id.radar_security_score);
+        bestChannelView = view.findViewById(R.id.radar_best_channel);
 
         targetLockCard = view.findViewById(R.id.target_lock_card);
         lockCategoryView = view.findViewById(R.id.lock_target_category);
@@ -160,6 +168,15 @@ public class RadarFragment extends Fragment {
         iotCountView.setText(String.format(Locale.US, "IoT: %d", iot));
         bleCountView.setText(String.format(Locale.US, "BLE: %d", ble));
 
+        if (securityScoreView != null && bestChannelView != null && networks != null) {
+            WirelessAnalytics.SecurityPosture posture = WirelessAnalytics.calculateSecurityPosture(networks);
+            WirelessAnalytics.ChannelReport report = WirelessAnalytics.analyzeChannels(networks);
+            securityScoreView.setText(String.format(Locale.US, "SEC SCORE: %d%% [OPEN: %.0f%% | WPA2/3: %.0f%%]",
+                    posture.getPostureScore(), posture.getOpenPercent(), posture.getWpa2Percent() + posture.getWpa3Percent()));
+            bestChannelView.setText(String.format(Locale.US, "BEST CH: 2.4G [%d] | 5G [%d]",
+                    report.bestChannel24, report.bestChannel5));
+        }
+
         // Sort targets: special threats first, then by signal strength descending
         Collections.sort(targetList, new Comparator<CyberRadarView.RadarTarget>() {
             @Override
@@ -247,20 +264,38 @@ public class RadarFragment extends Fragment {
             final CyberRadarView.RadarTarget target = targetList.get(position);
             final Network net = target.network;
 
+            final ImageView icon = convertView.findViewById(R.id.row_target_icon);
             final TextView badge = convertView.findViewById(R.id.row_target_badge);
             final TextView ssid = convertView.findViewById(R.id.row_target_ssid);
             final TextView level = convertView.findViewById(R.id.row_target_level);
             final TextView bssid = convertView.findViewById(R.id.row_target_bssid);
             final TextView detail = convertView.findViewById(R.id.row_target_detail);
 
+            DeviceTypeClassifier.DeviceType dt = DeviceTypeClassifier.classify(net);
+            if (icon != null) {
+                icon.setImageResource(dt.getIconRes());
+            }
+
             if (target.category.isSpecial()) {
                 badge.setText("[" + target.category.getLabel() + "]");
                 badge.setTextColor(target.color);
                 badge.setVisibility(View.VISIBLE);
                 ssid.setTextColor(target.color);
+            } else if (net.getType() == NetworkType.BLE || net.getType() == NetworkType.BT) {
+                badge.setText("[" + dt.getLabel() + "]");
+                badge.setTextColor(target.color);
+                badge.setVisibility(View.VISIBLE);
+                ssid.setTextColor(target.color);
+            } else if (net.getType() == NetworkType.WIFI) {
+                badge.setText("[WIFI]");
+                badge.setTextColor(target.color);
+                badge.setVisibility(View.VISIBLE);
+                ssid.setTextColor(target.color);
             } else {
-                badge.setVisibility(View.GONE);
-                ssid.setTextColor(getResources().getColor(R.color.cyber_cyan));
+                badge.setText("[" + net.getType().name() + "]");
+                badge.setTextColor(target.color);
+                badge.setVisibility(View.VISIBLE);
+                ssid.setTextColor(target.color);
             }
 
             final String ssidStr = net.getSsid() != null && !net.getSsid().isEmpty()
