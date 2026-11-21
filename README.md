@@ -1,4 +1,4 @@
-# 
+# Y
 
 ## Attributions
 Icon source from SVG:
