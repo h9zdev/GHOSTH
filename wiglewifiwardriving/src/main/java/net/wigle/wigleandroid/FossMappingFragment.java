@@ -498,9 +498,9 @@ public class FossMappingFragment extends AbstractMappingFragment {
         public void run() {
             final View view = getView();
             final Activity a = getActivity();
-            final SharedPreferences prefs = a != null?a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0):null;
-            // make sure the app isn't trying to finish
-            if ( ! finishing.get() ) {
+            final SharedPreferences prefs = a != null ? a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0) : null;
+            // make sure the app isn't trying to finish and fragment is active
+            if (!finishing.get() && isResumed() && a != null && view != null) {
                 final Location location = ListFragment.lameStatic.location;
                 if ( location != null ) {
                     if ( state.locked ) {
@@ -708,22 +708,54 @@ public class FossMappingFragment extends AbstractMappingFragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+        if (mapView != null) {
+            try {
+                mapView.onStart();
+            } catch (final Throwable ex) {
+                Logging.error("Error on mapView start: " + ex, ex);
+            }
+        }
+    }
+
+    @Override
+    public void onStop() {
+        Logging.info("FOSS MAP: onStop");
+        timer.removeCallbacks(mUpdateMapTask);
+        if (mapView != null) {
+            try {
+                mapView.onStop();
+            } catch (final Throwable ex) {
+                Logging.error("Error on mapView stop: " + ex, ex);
+            }
+        }
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        Logging.info("FOSS MAP: onDestroyView");
+        timer.removeCallbacks(mUpdateMapTask);
+        if (mapRender != null) {
+            mapRender.destroy();
+            mapRender = null;
+        }
+        super.onDestroyView();
+    }
+
+    @Override
     public void onPause() {
         Logging.info("FOSS MAP: onPause");
+        timer.removeCallbacks(mUpdateMapTask);
         super.onPause();
-        try {
-            mapView.onPause();
-        } catch (final NullPointerException ex) {
-            Logging.error("npe on mapview pause: " + ex, ex);
-        }
         if (mapView != null) {
-            mapView.onPause();
+            try {
+                mapView.onPause();
+            } catch (final Throwable ex) {
+                Logging.error("Error on mapView pause: " + ex, ex);
+            }
         }
-        //TODO:
-        /*if (map != null) {
-            // save memory
-            mapRender.clear();
-        }*/
         if (null != headingManager) {
             headingManager.stopSensor();
         }
@@ -731,13 +763,17 @@ public class FossMappingFragment extends AbstractMappingFragment {
 
     @Override
     public void onResume() {
-        Logging.info( "FOSS MAP: onResume" );
+        Logging.info("FOSS MAP: onResume");
         super.onResume();
         if (mapView != null) {
-            mapView.onResume();
-            mapView.postInvalidate();
+            try {
+                mapView.onResume();
+                mapView.postInvalidate();
+            } catch (final Throwable ex) {
+                Logging.error("Error on mapView resume: " + ex, ex);
+            }
         }
-        // Sync network markers from cache when returning to map tab (covers late style load or tab switch)
+        // Sync network markers from cache when returning to map tab
         if (mapRender != null) {
             mapRender.reCluster();
         }
@@ -750,7 +786,6 @@ public class FossMappingFragment extends AbstractMappingFragment {
         if (null != headingManager) {
             headingManager.startSensor();
         }
-        mapView.onResume();
     }
 
     @Override
