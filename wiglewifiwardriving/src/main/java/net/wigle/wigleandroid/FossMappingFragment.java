@@ -141,9 +141,8 @@ public class FossMappingFragment extends AbstractMappingFragment {
             String styleUrl;
             if (mapServerKey != null && !mapServerKey.isEmpty()) {
                 styleUrl = mapServerUrl + mapServerKey;
-                //e.g. "https://api.maptiler.com/maps/streets-v2/style.json?key=" + mapServerKey;
             } else {
-                styleUrl = "https://demotiles.maplibre.org/style.json";
+                styleUrl = "asset://osm_raster_style.json";
             }
             try {
                 mapLibreMap.setStyle(styleUrl, style -> {
@@ -160,7 +159,24 @@ public class FossMappingFragment extends AbstractMappingFragment {
                 });
             } catch (RuntimeException styleEx) {
                 Logging.error("Failed to apply FOSS map style '" + styleUrl + "': ", styleEx);
-                FossConfigDialogUtil.show(getActivity(), null);
+                if (!"asset://osm_raster_style.json".equals(styleUrl)) {
+                    try {
+                        mapLibreMap.setStyle("asset://osm_raster_style.json", style -> {
+                            final Activity activity = getActivity();
+                            if (activity != null) {
+                                mapRender = new FossMapRender(activity, mapLibreMap, false);
+                            }
+                            configureMapSettings(mapLibreMap, prefs, style);
+                            setupLocationTracking(mapLibreMap, prefs, style);
+                            setupCameraListeners(mapLibreMap, prefs, style);
+                            setupTileOverlay(mapLibreMap, prefs, style);
+                            setupRouteVisualization(mapLibreMap, prefs, visualizeRoute);
+                            initializeCameraPosition(mapLibreMap, oldCenter, oldZoom, prefs);
+                        });
+                    } catch (Throwable t) {
+                        Logging.error("Fallback to osm_raster_style failed: ", t);
+                    }
+                }
             }
         });
         setupCenterLocationButton(view);

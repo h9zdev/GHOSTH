@@ -717,7 +717,7 @@ public final class ListFragment extends Fragment implements ApiListener, DialogL
                 final MainActivity main = MainActivity.getMainActivity();
                 if (null != main) {
                     final SharedPreferences prefs = main.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
-                    fossMode = prefs.getBoolean(PREF_USE_FOSS_MAPS, false);
+                    fossMode = prefs.getBoolean(PREF_USE_FOSS_MAPS, true);
                 }
                 MainActivity.getNetworkCache().put(network.getBssid(), network);
                 final Intent intent = new Intent(activity, fossMode ? FossNetworkActivity.class : NetworkActivity.class);

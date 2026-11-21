@@ -79,9 +79,8 @@ public class FossGpxManagementActivity extends AbstractGpxManagementActivity {
                 String styleUrl;
                 if (mapServerKey != null && !mapServerKey.isEmpty()) {
                     styleUrl = mapServerUrl + mapServerKey;
-                    //e.g. "https://api.maptiler.com/maps/streets-v2/style.json?key=" + mapServerKey;
                 } else {
-                    styleUrl = "https://demotiles.maplibre.org/style.json";
+                    styleUrl = "asset://osm_raster_style.json";
                 }
                 try {
                     mapLibreMap.setStyle(styleUrl);

@@ -17,6 +17,12 @@
             android:contentDescription="@string/tab_map"
             />
         <item
+            android:id="@+id/nav_radar"
+            android:icon="@drawable/ic_gps"
+            android:title="@string/tab_radar"
+            android:contentDescription="@string/tab_radar"
+            />
+        <item
             android:id="@+id/nav_dash"
             android:icon="@drawable/dashboard"
             android:title="@string/tab_dash"

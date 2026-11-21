@@ -933,6 +933,7 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
     private CharSequence getTitleForNavId(final int itemId) {
         if (itemId == R.id.nav_list) return getString(R.string.list_app_name);
         if (itemId == R.id.nav_map) return getString(R.string.mapping_app_name);
+        if (itemId == R.id.nav_radar) return getString(R.string.tab_radar);
         if (itemId == R.id.nav_dash) return getString(R.string.dashboard_app_name);
         if (itemId == R.id.nav_data) return getString(R.string.data_activity_name);
         if (itemId == R.id.nav_search) return getString(R.string.tab_search);
@@ -976,6 +977,8 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
     private static Class classForFragmentNavId(final int navId) {
         if (navId == R.id.nav_list) {
             return ListFragment.class;
+        } else if (navId == R.id.nav_radar) {
+            return RadarFragment.class;
         } else if (navId == R.id.nav_dash) {
             return DashboardFragment.class;
         } else if (navId == R.id.nav_data) {
@@ -984,26 +987,26 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
             if (null != mainActivity) {
                 SharedPreferences prefs = mainActivity.getSharedPreferences(PreferenceKeys.SHARED_PREFS, Context.MODE_PRIVATE);
                 if (null != prefs) {
-                    if (prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, false)) {
+                    if (prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true)) {
                         return FossSearchFragment.class;
                     } else {
                         return SearchFragment.class;
                     }
                 }
             }
-            return SearchFragment.class;
+            return FossSearchFragment.class;
         } else if (navId == R.id.nav_map) {
             if (null != mainActivity) {
                 SharedPreferences prefs = mainActivity.getSharedPreferences(PreferenceKeys.SHARED_PREFS, Context.MODE_PRIVATE);
                 if (null != prefs) {
-                    if (prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, false)) {
+                    if (prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true)) {
                         return FossMappingFragment.class;
                     } else {
                         return MappingFragment.class;
                     }
                 }
             }
-            return MappingFragment.class;
+            return FossMappingFragment.class;
         } else if (navId == R.id.nav_user_stats) {
             return UserStatsFragment.class;
         } else if (navId == R.id.nav_rank) {

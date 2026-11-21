@@ -326,6 +326,10 @@ public final class SetNetworkListAdapter extends AbstractListAdapter<Network> {
         if (category.isSpecial()) {
             det = "[" + category.getLabel() + "] " + det;
             holder.detail.setTextColor(category.getColor());
+            holder.ssid.setTextColor(category.getColor());
+        } else {
+            holder.detail.setTextColor(android.graphics.Color.parseColor("#00FFF2"));
+            holder.ssid.setTextColor(android.graphics.Color.parseColor("#00FFF2"));
         }
         holder.detail.setText(det);
 

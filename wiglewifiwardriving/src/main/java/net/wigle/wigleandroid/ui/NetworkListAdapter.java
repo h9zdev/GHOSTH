@@ -262,10 +262,10 @@ public final class NetworkListAdapter extends AbstractListAdapter<Network> {
             btico.setVisibility(View.GONE);
         }
 
-        TextView tv = row.findViewById(R.id.ssid);
-        tv.setText(network.getSsid());
+        final TextView ssidTv = row.findViewById(R.id.ssid);
+        ssidTv.setText(network.getSsid());
 
-        tv = row.findViewById(R.id.oui);
+        TextView tv = row.findViewById(R.id.oui);
         final String ouiString = network.getOui(ListFragment.lameStatic.oui);
         final String sep = ouiString.length() > 0 ? " - " : "";
         tv.setText(ouiString + sep);
@@ -289,6 +289,10 @@ public final class NetworkListAdapter extends AbstractListAdapter<Network> {
         if (category.isSpecial()) {
             det = "[" + category.getLabel() + "] " + det;
             tv.setTextColor(category.getColor());
+            ssidTv.setTextColor(category.getColor());
+        } else {
+            tv.setTextColor(android.graphics.Color.parseColor("#00FFF2"));
+            ssidTv.setTextColor(android.graphics.Color.parseColor("#00FFF2"));
         }
         tv.setText(det);
         // status( position + " view done. ms: " + (System.currentTimeMillis() - start ) );

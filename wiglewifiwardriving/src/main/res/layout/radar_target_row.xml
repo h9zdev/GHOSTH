@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="5dp"
+    android:paddingHorizontal="4dp"
+    android:background="@drawable/cyber_card_bg"
+    android:layout_marginBottom="3dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/row_target_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/cyber_pink"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/share_tech_mono"
+            tools:text="[FLOCK]" />
+
+        <TextView
+            android:id="@+id/row_target_ssid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingStart="6dp"
+            android:textColor="@color/cyber_cyan"
+            android:textSize="12sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:fontFamily="@font/share_tech_mono"
+            tools:text="Falcon_Cam_01" />
+
+        <TextView
+            android:id="@+id/row_target_level"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/cyber_green"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/share_tech_mono"
+            tools:text="-64 dBm" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingTop="2dp">
+
+        <TextView
+            android:id="@+id/row_target_bssid"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textColor="@color/cyber_dim_cyan"
+            android:textSize="10sp"
+            android:fontFamily="@font/share_tech_mono"
+            tools:text="00:20:A6:44:11:22" />
+
+        <TextView
+            android:id="@+id/row_target_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/cyber_dim_cyan"
+            android:textSize="10sp"
+            android:fontFamily="@font/share_tech_mono"
+            tools:text="WPA2 [ESS]" />
+    </LinearLayout>
+</LinearLayout>
+

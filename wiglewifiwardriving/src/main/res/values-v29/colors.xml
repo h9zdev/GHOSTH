@@ -1,30 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="signal_one">#006F00</color>
-    <color name="signal_two">#3B6B00</color>
-    <color name="signal_three">#556500</color>
-    <color name="signal_four">#785B00</color>
-    <color name="signal_five">#AB8000</color>
-    <color name="signal_six">#AB3600</color>
-    <color name="signal_seven">#C00000</color>
-    <color name="gps_sat">#127700</color>
-    <color name="gps_network">#888800</color>
-    <color name="gps_passive">#AA6600</color>
-    <color name="gps_none">#990000</color>
-    <color name ="colorNavigationItem">#B0B0B0</color>
-    <color name ="colorNavigationItemSelected">#303030</color>
-    <color name ="colorNavigationItemExit">#FFC0C0</color>
-    <color name ="colorNavigationItemFg">#303030</color>
-    <color name ="colorNavigationItemSelectedFg">#B0B0B0</color>
-    <color name ="colorNavigationItemExitFg">#770000</color>
-    <color name ="colorNavigationItemBorder">#AA030303</color>
-    <color name ="colorListSsidText">#111111</color>
-    <color name="gpx_pressed_color">#B0B0B0</color>
-    <color name="gpx_selected_color">#B0B0B0</color>
-    <color name="gpx_focused_color">#1A1A1A</color>
-    <color name="child_activity_background">#FFF</color>
-    <color name="border_background">#B0B0B0</color>
-    <color name="list_background">#FFF</color>
-    <color name="list_item_match_background">#3CFF0000</color>
-    <color name="news_card_background_color">#FFFFFF</color>
+    <color name="cyber_bg">#050508</color>
+    <color name="cyber_surface">#0d0e15</color>
+    <color name="cyber_card">#121420</color>
+    <color name="cyber_cyan">#00fff2</color>
+    <color name="cyber_pink">#ff1f8f</color>
+    <color name="cyber_yellow">#ffe600</color>
+    <color name="cyber_green">#00ff66</color>
+    <color name="cyber_dim_cyan">#00a8a0</color>
+    <color name="cyber_dark_border">#1a1d2e</color>
+
+    <color name="signal_one">#00FF66</color>
+    <color name="signal_two">#00FFF2</color>
+    <color name="signal_three">#00A8A0</color>
+    <color name="signal_four">#FFE600</color>
+    <color name="signal_five">#FF8800</color>
+    <color name="signal_six">#FF1F8F</color>
+    <color name="signal_seven">#FF0033</color>
+    <color name="gps_sat">#00FF66</color>
+    <color name="gps_network">#FFE600</color>
+    <color name="gps_passive">#FF8800</color>
+    <color name="gps_none">#FF0033</color>
+
+    <color name="colorNavigationItem">#0d0e15</color>
+    <color name="colorNavigationItemSelected">#00fff2</color>
+    <color name="colorNavigationItemExit">#ff1f8f</color>
+    <color name="colorNavigationItemFg">#00fff2</color>
+    <color name="colorNavigationItemSelectedFg">#050508</color>
+    <color name="colorNavigationItemExitFg">#ffffff</color>
+    <color name="colorNavigationItemBorder">#ff1f8f</color>
+    <color name="colorListSsidText">#00fff2</color>
+
+    <color name="gpx_pressed_color">#121420</color>
+    <color name="gpx_selected_color">#1a1d2e</color>
+    <color name="gpx_focused_color">#00fff2</color>
+    <color name="child_activity_background">#050508</color>
+    <color name="border_background">#121420</color>
+    <color name="list_background">#050508</color>
+    <color name="list_item_match_background">#80FF1F8F</color>
+    <color name="news_card_background_color">#0d0e15</color>
 </resources>
