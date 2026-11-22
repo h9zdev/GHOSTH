@@ -1,12 +1,16 @@
 package net.wigle.wigleandroid.util;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import net.wigle.wigleandroid.R;
 import net.wigle.wigleandroid.WiGLELibreTileProvider;
+import net.wigle.wigleandroid.ui.WiGLEToast;
 
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.Style;
@@ -18,15 +22,23 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * Utility for safely loading and managing OpenStreetMap styles in MapLibre for GhostH.
- * Guarantees zero-API-key operation out-of-the-box by bundling CartoDB Dark Matter
- * and standard OpenStreetMap tile configs.
+ * Guarantees zero-API-key operation out-of-the-box by bundling Tactical Dark,
+ * Standard OpenStreetMap, and Satellite configs.
  */
 public final class MapStyleUtil {
 
     private MapStyleUtil() {}
 
     public static final String OSM_DARK_ASSET = "osm_raster_style.json";
+    public static final String OSM_STANDARD_ASSET = "osm_standard_style.json";
+    public static final String SATELLITE_ASSET = "satellite_style.json";
     public static final String DEFAULT_FALLBACK_URL = "https://demotiles.maplibre.org/style.json";
+
+    public static final int STYLE_TACTICAL_DARK = 0;
+    public static final int STYLE_OSM_STANDARD = 1;
+    public static final int STYLE_SATELLITE = 2;
+
+    public static final String PREF_OSM_STYLE_MODE = "osmStyleMode";
 
     /**
      * Initializes MapLibre and configures the HTTP client with required User-Agent headers
@@ -42,11 +54,11 @@ public final class MapStyleUtil {
     }
 
     /**
-     * Reads the bundled zero-API-key OpenStreetMap style JSON from assets.
+     * Reads a bundled asset style JSON file from the apk.
      */
     @Nullable
-    public static String getBundledOsmStyleJson(@NonNull final Context context) {
-        try (InputStream is = context.getAssets().open(OSM_DARK_ASSET);
+    public static String getAssetStyleJson(@NonNull final Context context, @NonNull final String assetName) {
+        try (InputStream is = context.getAssets().open(assetName);
              BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
             StringBuilder sb = new StringBuilder();
             String line;
@@ -55,15 +67,13 @@ public final class MapStyleUtil {
             }
             return sb.toString();
         } catch (Exception ex) {
-            Logging.error("Failed to read bundled OSM style: " + ex, ex);
+            Logging.error("Failed to read asset style " + assetName + ": " + ex, ex);
             return null;
         }
     }
 
     /**
-     * Sets the map style safely. Prioritizes custom tile server URL if configured by user,
-     * otherwise applies the bundled zero-key OpenStreetMap style. Never throws unhandled
-     * exceptions or triggers blocking dialogs.
+     * Sets the map style safely based on preferences.
      */
     public static void applyMapStyle(@NonNull final Context context,
                                      @NonNull final MapLibreMap map,
@@ -91,28 +101,43 @@ public final class MapStyleUtil {
             }
         }
 
-        // Apply bundled OpenStreetMap style (zero API key)
-        applyBundledOsmStyle(context, map, onStyleLoaded);
+        final int styleMode = prefs != null ? prefs.getInt(PREF_OSM_STYLE_MODE, STYLE_TACTICAL_DARK) : STYLE_TACTICAL_DARK;
+        applyStyleByMode(context, map, styleMode, onStyleLoaded);
     }
 
     /**
-     * Applies the bundled zero-key OpenStreetMap Dark Matter style.
+     * Applies a specific zero-key style by index.
      */
-    public static void applyBundledOsmStyle(@NonNull final Context context,
-                                           @NonNull final MapLibreMap map,
-                                           @Nullable final Style.OnStyleLoaded onStyleLoaded) {
-        final String json = getBundledOsmStyleJson(context);
+    public static void applyStyleByMode(@NonNull final Context context,
+                                        @NonNull final MapLibreMap map,
+                                        final int mode,
+                                        @Nullable final Style.OnStyleLoaded onStyleLoaded) {
+        final String assetName;
+        switch (mode) {
+            case STYLE_OSM_STANDARD:
+                assetName = OSM_STANDARD_ASSET;
+                break;
+            case STYLE_SATELLITE:
+                assetName = SATELLITE_ASSET;
+                break;
+            case STYLE_TACTICAL_DARK:
+            default:
+                assetName = OSM_DARK_ASSET;
+                break;
+        }
+
+        final String json = getAssetStyleJson(context, assetName);
         if (json != null && !json.isEmpty()) {
             try {
                 map.setStyle(new Style.Builder().fromJson(json), style -> {
-                    Logging.info("Bundled OpenStreetMap style loaded successfully (zero API key)");
+                    Logging.info("Applied style " + assetName + " successfully (zero API key)");
                     if (onStyleLoaded != null) {
                         onStyleLoaded.onStyleLoaded(style);
                     }
                 });
                 return;
             } catch (Exception ex) {
-                Logging.error("Failed applying bundled style from JSON: " + ex, ex);
+                Logging.error("Failed applying style " + assetName + ": " + ex, ex);
             }
         }
 
@@ -128,5 +153,39 @@ public final class MapStyleUtil {
             Logging.error("Failed applying fallback demo style: " + ex, ex);
         }
     }
-}
 
+    /**
+     * Cycles to the next style mode: Tactical Dark -> OpenStreetMap Official -> Satellite -> Tactical Dark.
+     */
+    public static void cycleMapStyle(@NonNull final Activity activity,
+                                     @NonNull final MapLibreMap map,
+                                     @NonNull final SharedPreferences prefs,
+                                     @Nullable final Style.OnStyleLoaded onStyleLoaded) {
+        int current = prefs.getInt(PREF_OSM_STYLE_MODE, STYLE_TACTICAL_DARK);
+        int next = (current + 1) % 3;
+        prefs.edit().putInt(PREF_OSM_STYLE_MODE, next).apply();
+
+        final String label;
+        switch (next) {
+            case STYLE_OSM_STANDARD:
+                label = "OpenStreetMap Standard (Free Zero Key)";
+                break;
+            case STYLE_SATELLITE:
+                label = "Satellite Imagery (Free Zero Key)";
+                break;
+            case STYLE_TACTICAL_DARK:
+            default:
+                label = "Tactical Dark Map (Free Zero Key)";
+                break;
+        }
+
+        WiGLEToast.showOverActivity(activity, R.string.tab_map, label, Toast.LENGTH_SHORT);
+        applyStyleByMode(activity, map, next, onStyleLoaded);
+    }
+
+    public static void applyBundledOsmStyle(@NonNull final Context context,
+                                           @NonNull final MapLibreMap map,
+                                           @Nullable final Style.OnStyleLoaded onStyleLoaded) {
+        applyStyleByMode(context, map, STYLE_TACTICAL_DARK, onStyleLoaded);
+    }
+}

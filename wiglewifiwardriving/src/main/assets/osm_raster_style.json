@@ -1,18 +1,23 @@
 {
   "version": 8,
-  "name": "Carto Dark Matter Raster",
+  "name": "GhostH Tactical Dark",
   "sources": {
-    "osm-raster-source": {
+    "dark-base-source": {
       "type": "raster",
       "tiles": [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-        "https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png"
+        "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
       ],
       "tileSize": 256,
       "maxzoom": 19,
-      "attribution": "\u00a9 OpenStreetMap contributors \u00a9 CARTO"
+      "attribution": "© OpenStreetMap contributors, Esri"
+    },
+    "dark-labels-source": {
+      "type": "raster",
+      "tiles": [
+        "https://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+      ],
+      "tileSize": 256,
+      "maxzoom": 19
     }
   },
   "layers": [
@@ -24,9 +29,16 @@
       }
     },
     {
-      "id": "osm-raster-layer",
+      "id": "dark-base-layer",
       "type": "raster",
-      "source": "osm-raster-source",
+      "source": "dark-base-source",
+      "minzoom": 0,
+      "maxzoom": 19
+    },
+    {
+      "id": "dark-labels-layer",
+      "type": "raster",
+      "source": "dark-labels-source",
       "minzoom": 0,
       "maxzoom": 19
     }

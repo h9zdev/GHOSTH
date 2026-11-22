@@ -471,9 +471,13 @@ public class FossMappingFragment extends AbstractMappingFragment {
             }
             case MENU_MAP_TYPE: {
                 if (mapView != null) {
+                    final SharedPreferences prefs = a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
                     mapView.getMapAsync(map -> {
-                        MapStyleUtil.applyBundledOsmStyle(a, map, null);
-                        WiGLEToast.showOverActivity(a, R.string.tab_map, "OpenStreetMap (Carto Dark)", Toast.LENGTH_SHORT);
+                        MapStyleUtil.cycleMapStyle(a, map, prefs, style -> {
+                            if (mapRender != null) {
+                                mapRender.reCluster();
+                            }
+                        });
                     });
                 }
                 return true;
