@@ -1,3 +1,6 @@
+
+
+
 package net.wigle.wigleandroid.intelligence.ui
 
 import android.os.Bundle
@@ -9,7 +12,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -142,6 +144,11 @@ fun IntelligenceScreen(
             // Module Cards & Summary
             val densityFindings = findings.filter { it.analyzerType == AnalyzerType.DENSITY_PREDICTION }
             val anomalyFindings = findings.filter { it.analyzerType == AnalyzerType.ANOMALY_DETECTION }
+            val signalFindings = findings.filter { it.analyzerType == AnalyzerType.SIGNAL_INTELLIGENCE }
+            val temporalFindings = findings.filter { it.analyzerType == AnalyzerType.TEMPORAL_INTELLIGENCE }
+            val clusterFindings = findings.filter { it.analyzerType == AnalyzerType.ML_CLUSTERING }
+            val geoFindings = findings.filter { it.analyzerType == AnalyzerType.GEOSPATIAL_ML }
+            val predFindings = findings.filter { it.analyzerType == AnalyzerType.PREDICTIVE_ANALYTICS }
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -186,6 +193,76 @@ fun IntelligenceScreen(
                         sparklineData = sparkline,
                         accentColor = accent,
                         onViewDetailsClick = { viewModel.selectModule(AnalyzerType.ANOMALY_DETECTION) }
+                    )
+                }
+
+                // Module 3: Signal Intelligence
+                item {
+                    val sparkline = listOf(0.3f, 0.6f, 0.4f, 0.8f, 0.7f)
+                    ModuleCard(
+                        type = AnalyzerType.SIGNAL_INTELLIGENCE,
+                        headlineMetric = "${signalFindings.size} Spectrum Metrics",
+                        metricSubtitle = "Congestion & Tri-band 2.4/5/6 GHz balance",
+                        statusText = if (signalFindings.any { it.title.contains("Congestion") }) "CONGESTED" else "OPTIMAL",
+                        sparklineData = sparkline,
+                        accentColor = CyberGreen,
+                        onViewDetailsClick = { viewModel.selectModule(AnalyzerType.SIGNAL_INTELLIGENCE) }
+                    )
+                }
+
+                // Module 4: Temporal Intelligence
+                item {
+                    val sparkline = listOf(0.1f, 0.2f, 0.5f, 0.7f, 0.9f)
+                    ModuleCard(
+                        type = AnalyzerType.TEMPORAL_INTELLIGENCE,
+                        headlineMetric = "${temporalFindings.size} Temporal Events",
+                        metricSubtitle = "Network emergence & persistent node churn",
+                        statusText = "HISTORICAL ACTIVE",
+                        sparklineData = sparkline,
+                        accentColor = CyberYellow,
+                        onViewDetailsClick = { viewModel.selectModule(AnalyzerType.TEMPORAL_INTELLIGENCE) }
+                    )
+                }
+
+                // Module 5: ML Clustering
+                item {
+                    val sparkline = listOf(0.5f, 0.7f, 0.6f, 0.8f)
+                    ModuleCard(
+                        type = AnalyzerType.ML_CLUSTERING,
+                        headlineMetric = "${clusterFindings.size} Environment Clusters",
+                        metricSubtitle = "Proximity centroid & venue classification",
+                        statusText = "CLUSTERED",
+                        sparklineData = sparkline,
+                        accentColor = CyberCyan,
+                        onViewDetailsClick = { viewModel.selectModule(AnalyzerType.ML_CLUSTERING) }
+                    )
+                }
+
+                // Module 6: Geospatial ML
+                item {
+                    val sparkline = listOf(0.4f, 0.3f, 0.7f, 0.9f)
+                    ModuleCard(
+                        type = AnalyzerType.GEOSPATIAL_ML,
+                        headlineMetric = "${geoFindings.size} DBSCAN Density Clusters",
+                        metricSubtitle = "Spatial core density & mobile AP tracking",
+                        statusText = if (geoFindings.any { it.title.contains("Mobile") }) "MOBILE AP DETECTED" else "STATIONARY",
+                        sparklineData = sparkline,
+                        accentColor = CyberOrange,
+                        onViewDetailsClick = { viewModel.selectModule(AnalyzerType.GEOSPATIAL_ML) }
+                    )
+                }
+
+                // Module 7: Predictive Analytics
+                item {
+                    val sparkline = listOf(0.2f, 0.4f, 0.6f, 0.75f, 0.95f)
+                    ModuleCard(
+                        type = AnalyzerType.PREDICTIVE_ANALYTICS,
+                        headlineMetric = "${predFindings.size} Trend Forecasts",
+                        metricSubtitle = "Velocity projection & trajectory derivative",
+                        statusText = "FORECASTING ACTIVE",
+                        sparklineData = sparkline,
+                        accentColor = CyberCyan,
+                        onViewDetailsClick = { viewModel.selectModule(AnalyzerType.PREDICTIVE_ANALYTICS) }
                     )
                 }
 

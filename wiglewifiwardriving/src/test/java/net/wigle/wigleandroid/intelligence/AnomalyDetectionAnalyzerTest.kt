@@ -116,3 +116,4 @@ class AnomalyDetectionAnalyzerTest {
         assertEquals(Severity.HIGH, macMutation?.severity)
     }
 }
+

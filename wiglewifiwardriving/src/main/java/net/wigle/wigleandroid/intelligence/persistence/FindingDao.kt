@@ -35,3 +35,4 @@ interface FindingDao {
     @Query("DELETE FROM findings")
     suspend fun clearAll()
 }
+

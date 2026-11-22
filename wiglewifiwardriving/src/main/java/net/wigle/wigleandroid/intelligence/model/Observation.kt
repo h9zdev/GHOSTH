@@ -25,3 +25,4 @@ data class Observation(
     val type: NetworkType = NetworkType.WIFI,
     val vendor: String? = null
 )
+

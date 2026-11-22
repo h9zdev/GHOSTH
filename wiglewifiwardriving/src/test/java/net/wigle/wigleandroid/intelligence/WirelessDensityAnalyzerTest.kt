@@ -74,3 +74,4 @@ class WirelessDensityAnalyzerTest {
         assertEquals(1.0, densePoint!!.weight, 0.01)
     }
 }
+

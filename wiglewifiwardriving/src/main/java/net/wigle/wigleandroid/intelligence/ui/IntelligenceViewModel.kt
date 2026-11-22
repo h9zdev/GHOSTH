@@ -235,6 +235,16 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
         // 4. Sparse fringe area for density prediction interpolation
         list.add(Observation("55:66:77:88:99:AA", "Remote_Cabin_Net", baseLat + 0.008, baseLon + 0.008, rssi = -82, timestamp = now - 10000))
 
+        // 5. Mobile AP (Vehicular Bus / Transit Hotspot) across distant coordinates
+        val busMac = "EE:AA:BB:CC:11:22"
+        list.add(Observation(busMac, "Muni_Transit_Bus_42", baseLat, baseLon, rssi = -64, channel = 1, timestamp = now - 9000))
+        list.add(Observation(busMac, "Muni_Transit_Bus_42", baseLat + 0.005, baseLon + 0.005, rssi = -62, channel = 1, timestamp = now - 4000)) // ~650m away
+
+        // 6. Wi-Fi 6E/7 (6 GHz) modern enterprise transmissions
+        list.add(Observation("00:AA:11:22:33:44", "TechHQ_6G_Ultra", baseLat + 0.001, baseLon + 0.001, rssi = -58, frequency = 6125, channel = 35, capabilities = "[WPA3-SAE-CCMP][ESS]", timestamp = now - 2000))
+        list.add(Observation("00:AA:11:22:33:45", "TechHQ_6G_Ultra", baseLat + 0.0012, baseLon + 0.0011, rssi = -60, frequency = 6285, channel = 67, capabilities = "[WPA3-SAE-CCMP][ESS]", timestamp = now - 1000))
+
         return list
     }
 }
+

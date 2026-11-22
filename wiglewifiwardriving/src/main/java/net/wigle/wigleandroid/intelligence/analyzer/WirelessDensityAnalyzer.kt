@@ -201,3 +201,4 @@ class WirelessDensityAnalyzer(
         return if (weightSum > 0) weightedSum / weightSum else -100.0
     }
 }
+

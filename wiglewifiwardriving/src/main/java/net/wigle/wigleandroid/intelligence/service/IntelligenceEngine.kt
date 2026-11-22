@@ -4,9 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import net.wigle.wigleandroid.intelligence.analyzer.Analyzer
-import net.wigle.wigleandroid.intelligence.analyzer.AnomalyDetectionAnalyzer
-import net.wigle.wigleandroid.intelligence.analyzer.WirelessDensityAnalyzer
+import net.wigle.wigleandroid.intelligence.analyzer.*
 import net.wigle.wigleandroid.intelligence.model.AnalyzerType
 import net.wigle.wigleandroid.intelligence.model.Finding
 import net.wigle.wigleandroid.intelligence.model.Observation
@@ -25,8 +23,21 @@ class IntelligenceEngine private constructor(context: Context) {
 
     val densityAnalyzer = WirelessDensityAnalyzer()
     val anomalyAnalyzer = AnomalyDetectionAnalyzer()
+    val signalAnalyzer = SignalIntelligenceAnalyzer()
+    val temporalAnalyzer = TemporalIntelligenceAnalyzer()
+    val clusteringAnalyzer = MlClusteringAnalyzer()
+    val geospatialAnalyzer = GeospatialMlAnalyzer()
+    val predictiveAnalyzer = PredictiveAnalyticsAnalyzer()
 
-    private val activeAnalyzers = listOf<Analyzer>(densityAnalyzer, anomalyAnalyzer)
+    private val activeAnalyzers = listOf<Analyzer>(
+        densityAnalyzer,
+        anomalyAnalyzer,
+        signalAnalyzer,
+        temporalAnalyzer,
+        clusteringAnalyzer,
+        geospatialAnalyzer,
+        predictiveAnalyzer
+    )
 
     fun observeAllFindings(): Flow<List<Finding>> {
         return findingDao.getAllFindings().map { list -> list.map { it.toDomain() } }
@@ -68,6 +79,7 @@ class IntelligenceEngine private constructor(context: Context) {
         withContext(Dispatchers.IO) {
             findingDao.clearAll()
             anomalyAnalyzer.resetState()
+            temporalAnalyzer.reset()
         }
     }
 
@@ -75,7 +87,12 @@ class IntelligenceEngine private constructor(context: Context) {
         mapOf(
             "total" to findingDao.getTotalCount(),
             "density" to findingDao.getCountByType(AnalyzerType.DENSITY_PREDICTION.name),
-            "anomaly" to findingDao.getCountByType(AnalyzerType.ANOMALY_DETECTION.name)
+            "anomaly" to findingDao.getCountByType(AnalyzerType.ANOMALY_DETECTION.name),
+            "signal" to findingDao.getCountByType(AnalyzerType.SIGNAL_INTELLIGENCE.name),
+            "temporal" to findingDao.getCountByType(AnalyzerType.TEMPORAL_INTELLIGENCE.name),
+            "clustering" to findingDao.getCountByType(AnalyzerType.ML_CLUSTERING.name),
+            "geospatial" to findingDao.getCountByType(AnalyzerType.GEOSPATIAL_ML.name),
+            "predictive" to findingDao.getCountByType(AnalyzerType.PREDICTIVE_ANALYTICS.name)
         )
     }
 
@@ -90,3 +107,4 @@ class IntelligenceEngine private constructor(context: Context) {
         }
     }
 }
+

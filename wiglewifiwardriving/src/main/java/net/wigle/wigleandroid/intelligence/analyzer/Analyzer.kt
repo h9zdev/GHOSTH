@@ -10,3 +10,4 @@ import net.wigle.wigleandroid.intelligence.model.Observation
 interface Analyzer {
     suspend fun analyze(batch: List<Observation>): List<Finding>
 }
+

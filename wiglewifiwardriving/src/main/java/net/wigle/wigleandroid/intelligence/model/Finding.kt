@@ -32,3 +32,4 @@ data class Finding(
     val score: Double = 0.0,
     val details: String = ""
 )
+

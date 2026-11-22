@@ -94,3 +94,4 @@ fun IntelligenceTheme(
         content = content
     )
 }
+
