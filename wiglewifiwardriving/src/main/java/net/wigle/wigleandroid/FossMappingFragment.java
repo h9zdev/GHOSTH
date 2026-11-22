@@ -6,6 +6,7 @@ import static net.wigle.wigleandroid.util.PreferenceKeys.PREF_FOSS_MAPS_VECTOR_T
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -15,6 +16,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
@@ -25,8 +27,10 @@ import com.goebl.simplify.Simplify;
 import net.wigle.wigleandroid.model.LatLng;
 import net.wigle.wigleandroid.model.Network;
 import net.wigle.wigleandroid.ui.ThemeUtil;
+import net.wigle.wigleandroid.ui.WiGLEToast;
 import net.wigle.wigleandroid.util.FossConfigDialogUtil;
 import net.wigle.wigleandroid.util.Logging;
+import net.wigle.wigleandroid.util.MapStyleUtil;
 import net.wigle.wigleandroid.util.PreferenceKeys;
 
 import org.maplibre.android.MapLibre;
@@ -79,6 +83,7 @@ public class FossMappingFragment extends AbstractMappingFragment {
             // throws and crashes the app.
             try {
                 MapLibre.getInstance(a);
+                MapStyleUtil.initializeMapEngine(a);
             } catch (Throwable t) {
                 Logging.error("Failed to initialize MapLibre for FossMappingFragment: ", t);
             }
@@ -107,7 +112,6 @@ public class FossMappingFragment extends AbstractMappingFragment {
                     Logging.error("FossMappingFragment mapView.onCreate failed: " + ex, ex);
                 }
             }
-            //TODO: theming for MapLibre
             final LatLng oldCenter = state.oldCenter != null ? state.oldCenter : null;
             int oldZoom = Integer.MIN_VALUE;
             setupMapView(view, oldCenter, oldZoom);
@@ -132,66 +136,28 @@ public class FossMappingFragment extends AbstractMappingFragment {
             return;
         }
         mapView.getMapAsync(mapLibreMap -> {
-            final String mapServerKey = prefs != null ?
-                    prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
-            final String mapServerUrl = prefs != null ?
-                    prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_STYLE, null) : null;
+            final Activity activity = getActivity();
+            if (activity == null) return;
 
-            //TODO: day/night style?
-            String styleUrl;
-            if (mapServerKey != null && !mapServerKey.isEmpty()) {
-                styleUrl = mapServerUrl + mapServerKey;
-            } else {
-                styleUrl = "asset://osm_raster_style.json";
-            }
-            try {
-                mapLibreMap.setStyle(styleUrl, style -> {
-                    final Activity activity = getActivity();
-                    if (activity != null) {
-                        mapRender = new FossMapRender(activity, mapLibreMap, false);
-                        if (MainActivity.getNetworkCache() != null) {
-                            for (Network net : MainActivity.getNetworkCache().values()) {
-                                if (net != null) {
-                                    mapRender.addItem(net);
-                                }
+            MapStyleUtil.applyMapStyle(activity, mapLibreMap, prefs, style -> {
+                final Activity curAct = getActivity();
+                if (curAct != null) {
+                    mapRender = new FossMapRender(curAct, mapLibreMap, false);
+                    if (MainActivity.getNetworkCache() != null) {
+                        for (Network net : MainActivity.getNetworkCache().values()) {
+                            if (net != null) {
+                                mapRender.addItem(net);
                             }
                         }
                     }
-                    configureMapSettings(mapLibreMap, prefs, style);
-                    setupLocationTracking(mapLibreMap, prefs, style);
-                    setupCameraListeners(mapLibreMap, prefs, style);
-                    setupTileOverlay(mapLibreMap, prefs, style);
-                    setupRouteVisualization(mapLibreMap, prefs, visualizeRoute);
-                    initializeCameraPosition(mapLibreMap, oldCenter, oldZoom, prefs);
-                });
-            } catch (RuntimeException styleEx) {
-                Logging.error("Failed to apply FOSS map style '" + styleUrl + "': ", styleEx);
-                if (!"asset://osm_raster_style.json".equals(styleUrl)) {
-                    try {
-                        mapLibreMap.setStyle("asset://osm_raster_style.json", style -> {
-                            final Activity activity = getActivity();
-                            if (activity != null) {
-                                mapRender = new FossMapRender(activity, mapLibreMap, false);
-                                if (MainActivity.getNetworkCache() != null) {
-                                    for (Network net : MainActivity.getNetworkCache().values()) {
-                                        if (net != null) {
-                                            mapRender.addItem(net);
-                                        }
-                                    }
-                                }
-                            }
-                            configureMapSettings(mapLibreMap, prefs, style);
-                            setupLocationTracking(mapLibreMap, prefs, style);
-                            setupCameraListeners(mapLibreMap, prefs, style);
-                            setupTileOverlay(mapLibreMap, prefs, style);
-                            setupRouteVisualization(mapLibreMap, prefs, visualizeRoute);
-                            initializeCameraPosition(mapLibreMap, oldCenter, oldZoom, prefs);
-                        });
-                    } catch (Throwable t) {
-                        Logging.error("Fallback to osm_raster_style failed: ", t);
-                    }
                 }
-            }
+                configureMapSettings(mapLibreMap, prefs, style);
+                setupLocationTracking(mapLibreMap, prefs, style);
+                setupCameraListeners(mapLibreMap, prefs, style);
+                setupTileOverlay(mapLibreMap, prefs, style);
+                setupRouteVisualization(mapLibreMap, prefs, visualizeRoute);
+                initializeCameraPosition(mapLibreMap, oldCenter, oldZoom, prefs);
+            });
         });
         setupCenterLocationButton(view);
     }
@@ -487,6 +453,56 @@ public class FossMappingFragment extends AbstractMappingFragment {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        final Activity a = getActivity();
+        if (a == null) return false;
+
+        switch (item.getItemId()) {
+            case MENU_TOGGLE_LOCK: {
+                state.locked = !state.locked;
+                WiGLEToast.showOverActivity(a, R.string.tab_map,
+                        state.locked ? getString(R.string.menu_turn_off_lockon) : getString(R.string.menu_turn_on_lockon),
+                        Toast.LENGTH_SHORT);
+                return true;
+            }
+            case MENU_FILTER: {
+                final Intent intent = new Intent(a, MapFilterActivity.class);
+                a.startActivity(intent);
+                return true;
+            }
+            case MENU_MAP_TYPE: {
+                if (mapView != null) {
+                    mapView.getMapAsync(map -> {
+                        MapStyleUtil.applyBundledOsmStyle(a, map, null);
+                        WiGLEToast.showOverActivity(a, R.string.tab_map, "OpenStreetMap (Carto Dark)", Toast.LENGTH_SHORT);
+                    });
+                }
+                return true;
+            }
+            case MENU_WAKELOCK: {
+                boolean isLocked = MainActivity.isScreenLocked(this);
+                MainActivity.setLockScreen(this, !isLocked);
+                return true;
+            }
+            case MENU_SWITCH_MAP_ENGINE: {
+                final SharedPreferences prefs = a.getSharedPreferences(PreferenceKeys.SHARED_PREFS, 0);
+                final boolean useFoss = prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true);
+                prefs.edit().putBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, !useFoss).apply();
+                WiGLEToast.showOverActivity(a, R.string.tab_map,
+                        !useFoss ? "Switched to OpenStreetMap (Zero Key)" : "Switched to Google Maps",
+                        Toast.LENGTH_SHORT);
+                if (a instanceof MainActivity) {
+                    ((MainActivity) a).selectFragment(R.id.nav_map);
+                }
+                return true;
+            }
+            case MENU_LABEL:
+            case MENU_CLUSTER: {
+                if (mapRender != null) {
+                    mapRender.reCluster();
+                }
+                return true;
+            }
+        }
         return false;
     }
 

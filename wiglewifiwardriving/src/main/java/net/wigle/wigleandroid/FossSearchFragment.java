@@ -26,6 +26,7 @@ import net.wigle.wigleandroid.model.QueryArgs;
 import net.wigle.wigleandroid.util.FossConfigDialogUtil;
 import net.wigle.wigleandroid.util.GeocodingUtil;
 import net.wigle.wigleandroid.util.Logging;
+import net.wigle.wigleandroid.util.MapStyleUtil;
 
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.camera.CameraPosition;
@@ -121,29 +122,13 @@ public class FossSearchFragment extends AbstractSearchFragment {
 
         if (null != mapView) {
             mapView.getMapAsync(mapLibreMap -> {
-                // Use style URL if API key is available, otherwise fall back to demo tiles
-                final String mapServerKey = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
-                final String mapServerUrl = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_STYLE, null) : null;
-
-                //TODO: day/night style?
-                String styleUrl;
-                if (mapServerKey != null && !mapServerKey.isEmpty()) {
-                    styleUrl = mapServerUrl + mapServerKey;
-                } else {
-                    styleUrl = "asset://osm_raster_style.json";
-                }
-
-                try {
-                    mapLibreMap.setStyle(styleUrl);
+                final Activity act = getActivity();
+                if (act == null) return;
+                MapStyleUtil.applyMapStyle(act, mapLibreMap, prefs, style -> {
                     mapLibreMap.setCameraPosition(
                             new CameraPosition.Builder().target(
                                     new org.maplibre.android.geometry.LatLng(0.0, 0.0)).zoom(1.0).build());
-                } catch (RuntimeException styleEx) {
-                    Logging.error("Failed to apply FOSS search map style '" + styleUrl + "': ", styleEx);
-                    FossConfigDialogUtil.show(getActivity(), null);
-                }
+                });
             });
             if ((center != null)) {
                 mapView.getMapAsync(mapLibreMap -> {

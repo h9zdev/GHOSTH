@@ -21,6 +21,7 @@ import net.wigle.wigleandroid.model.Network;
 import net.wigle.wigleandroid.model.NetworkType;
 import net.wigle.wigleandroid.util.FossConfigDialogUtil;
 import net.wigle.wigleandroid.util.Logging;
+import net.wigle.wigleandroid.util.MapStyleUtil;
 import net.wigle.wigleandroid.util.PreferenceKeys;
 
 import org.maplibre.android.MapLibre;
@@ -139,50 +140,34 @@ public class FossNetworkActivity extends AbstractNetworkActivity {
         try {
             mapView.onCreate(savedInstanceState);
             mapView.getMapAsync(mapLibreMap -> {
-                final String mapServerKey = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
-                final String mapServerUrl = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_STYLE, null) : null;
-
-                String styleUrl;
-                if (mapServerKey != null && !mapServerKey.isEmpty()) {
-                    styleUrl = mapServerUrl + mapServerKey;
-                } else {
-                    styleUrl = "asset://osm_raster_style.json";
-                }
-                try {
-                    mapLibreMap.setStyle(styleUrl, style -> {
-                        if ((network != null) && (network.getLatLng() != null)) {
-                            final org.maplibre.android.geometry.LatLng focusOn =
-                                    toMapLibreLatLng(network.getLatLng());
-                            if (focusOn == null) {
-                                Logging.warn("Skipping FOSS network map focus; invalid coordinates: "
-                                        + network.getLatLng());
-                                return;
-                            }
-                            final CameraPosition cameraPosition = new CameraPosition.Builder()
-                                    .target(focusOn).zoom(DEFAULT_ZOOM).build();
-                            mapLibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-
-                            final String sourceId = "center-source";
-                            final GeoJsonSource source = new GeoJsonSource(
-                                    sourceId, Point.fromLngLat(focusOn.getLongitude(), focusOn.getLatitude()));
-                            style.addSource(source);
-                            final String layerId = "circle-layer";
-                            final CircleLayer circleLayer = new CircleLayer(layerId, sourceId);
-                            circleLayer.setProperties(
-                                    PropertyFactory.circleColor(Color.argb(128, 245, 245, 245)),
-                                    PropertyFactory.circleStrokeColor(Color.argb(200, 255, 32, 32)),
-                                    PropertyFactory.circleStrokeWidth(2f),
-                                    PropertyFactory.circleRadius(10.0f)
-                            );
-                            style.addLayer(circleLayer);
+                MapStyleUtil.applyMapStyle(this, mapLibreMap, prefs, style -> {
+                    if ((network != null) && (network.getLatLng() != null)) {
+                        final org.maplibre.android.geometry.LatLng focusOn =
+                                toMapLibreLatLng(network.getLatLng());
+                        if (focusOn == null) {
+                            Logging.warn("Skipping FOSS network map focus; invalid coordinates: "
+                                    + network.getLatLng());
+                            return;
                         }
-                    });
-                } catch (RuntimeException styleEx) {
-                    Logging.error("Failed to apply FOSS map style '" + styleUrl + "': ", styleEx);
-                    FossConfigDialogUtil.show(FossNetworkActivity.this, null);
-                }
+                        final CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(focusOn).zoom(DEFAULT_ZOOM).build();
+                        mapLibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+                        final String sourceId = "center-source";
+                        final GeoJsonSource source = new GeoJsonSource(
+                                sourceId, Point.fromLngLat(focusOn.getLongitude(), focusOn.getLatitude()));
+                        style.addSource(source);
+                        final String layerId = "circle-layer";
+                        final CircleLayer circleLayer = new CircleLayer(layerId, sourceId);
+                        circleLayer.setProperties(
+                                PropertyFactory.circleColor(Color.argb(128, 245, 245, 245)),
+                                PropertyFactory.circleStrokeColor(Color.argb(200, 255, 32, 32)),
+                                PropertyFactory.circleStrokeWidth(2f),
+                                PropertyFactory.circleRadius(10.0f)
+                        );
+                        style.addLayer(circleLayer);
+                    }
+                });
             });
             //TODO: day/night equivalent?
             //ThemeUtil.setMapTheme(mapLibre, mapView.getContext(), prefs, R.raw.night_style_json));

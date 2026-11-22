@@ -1008,7 +1008,14 @@ public final class MainActivity extends AppCompatActivity implements TextToSpeec
                     if (prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true)) {
                         return FossMappingFragment.class;
                     } else {
-                        return MappingFragment.class;
+                        try {
+                            final int avail = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(mainActivity);
+                            if (avail == com.google.android.gms.common.ConnectionResult.SUCCESS) {
+                                return MappingFragment.class;
+                            }
+                        } catch (Throwable t) {
+                            Logging.warn("Google Play Services check failed, falling back to OpenStreetMap: " + t);
+                        }
                     }
                 }
             }

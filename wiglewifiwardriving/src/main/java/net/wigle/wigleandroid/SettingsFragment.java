@@ -58,6 +58,9 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import net.wigle.wigleandroid.net.WiGLEApiManager;
 
 import com.github.razir.progressbutton.DrawableButton;
 import com.github.razir.progressbutton.DrawableButtonExtensionsKt;
@@ -860,69 +863,61 @@ public final class SettingsFragment extends Fragment implements DialogListener {
                 final Editable keyPart = fossMapKeyEdit.getText();
                 final String urlCandidate = urlPart == null ? "" : urlPart.toString().trim();
                 final String keyCandidate = keyPart == null ? "" : keyPart.toString().trim();
-                if (urlCandidate.isEmpty()) {
-                    fossMapStyleUrlEdit.setError("required");
-                } else if (keyCandidate.isEmpty()) {
-                    fossMapKeyEdit.setError("required");
+
+                final String testUrl;
+                final boolean isBuiltIn = urlCandidate.isEmpty();
+                if (isBuiltIn) {
+                    testUrl = "https://a.basemaps.cartocdn.com/dark_all/0/0/0.png";
                 } else {
-                    final String concat = urlCandidate + keyCandidate;
-                    final HttpUrl httpUrl = HttpUrl.parse(concat);
-                    if (httpUrl == null) {
-                        fossMapStyleUrlEdit.setError("invalid");
-                    } else {
-                        final String scheme = httpUrl.scheme();
-                        if (!"http".equals(scheme) && !"https".equals(scheme)) {
-                            fossMapStyleUrlEdit.setError("invalid scheme: "+scheme);
-                        } else {
-                            showProgressCenter(verify);
-                            final OkHttpClient checkClient = new OkHttpClient.Builder()
-                                    .connectTimeout(CONN_TIMEOUT_S, TimeUnit.SECONDS)
-                                    .writeTimeout(WRITE_TIMEOUT_S, TimeUnit.SECONDS)
-                                    .readTimeout(READ_TIMEOUT_S, TimeUnit.SECONDS).build();
-                            try {
-                                final Request request = new Request.Builder()
-                                        .url(httpUrl)
-                                        .build();
-                                checkClient.newCall(request).enqueue(new Callback() {
-                                    final Handler mainHandler = new Handler(Looper.getMainLooper());
+                    testUrl = urlCandidate + keyCandidate;
+                }
 
-                                    @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                                        mainHandler.post(() -> {
-                                            fossMapStyleUrlEdit.setError("required");
-                                            hideProgressCenterFail(verify);
-                                        });
-                                    }
+                final HttpUrl httpUrl = HttpUrl.parse(testUrl);
+                if (httpUrl == null) {
+                    fossMapStyleUrlEdit.setError("invalid URL format");
+                    return;
+                }
 
-                                    @Override public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                                        if (response.isSuccessful()) {
-                                            mainHandler.post(() -> hideProgressCenterSuccess(verify));
-                                        } else {
-                                            if (response.code() == 404) {
-                                                mainHandler.post(() -> {
-                                                    fossMapStyleUrlEdit.setError("required");
-                                                    hideProgressCenterFail(verify);
-                                                });
-                                            } else if (response.code() == 401 || response.code() == 403) {
-                                                mainHandler.post(() -> {
-                                                    fossMapKeyEdit.setError("required");
-                                                    hideProgressCenterFail(verify);
-                                                });
-                                            } else {
-                                                mainHandler.post(() -> hideProgressCenterFail(verify));
-                                            }
-                                        }
-                                    }
-                                });
-                            } catch (final IllegalArgumentException ex) {
-                                Logging.warn("FOSS map verify URL rejected by OkHttp: " + ex.getMessage(), ex);
-                                fossMapStyleUrlEdit.setError("invalid");
+                showProgressCenter(verify);
+                final OkHttpClient checkClient = new OkHttpClient.Builder()
+                        .connectTimeout(CONN_TIMEOUT_S, TimeUnit.SECONDS)
+                        .writeTimeout(WRITE_TIMEOUT_S, TimeUnit.SECONDS)
+                        .readTimeout(READ_TIMEOUT_S, TimeUnit.SECONDS).build();
+                try {
+                    final Request request = new Request.Builder()
+                            .url(httpUrl)
+                            .header("User-Agent", WiGLEApiManager.USER_AGENT)
+                            .build();
+                    checkClient.newCall(request).enqueue(new Callback() {
+                        final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+                        @Override public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                            mainHandler.post(() -> {
                                 hideProgressCenterFail(verify);
-                            }
+                                WiGLEToast.showOverActivity(getActivity(), R.string.tab_map, "Connection failed: " + e.getMessage(), Toast.LENGTH_SHORT);
+                            });
                         }
-                    }
+
+                        @Override public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                            mainHandler.post(() -> {
+                                if (response.isSuccessful()) {
+                                    hideProgressCenterSuccess(verify);
+                                    WiGLEToast.showOverActivity(getActivity(), R.string.tab_map, isBuiltIn
+                                            ? "OpenStreetMap (Zero API Key) Connected!"
+                                            : "Custom Map Server Connected!", Toast.LENGTH_SHORT);
+                                } else {
+                                    hideProgressCenterFail(verify);
+                                    WiGLEToast.showOverActivity(getActivity(), R.string.tab_map, "Server returned HTTP " + response.code(), Toast.LENGTH_SHORT);
+                                }
+                            });
+                        }
+                    });
+                } catch (final IllegalArgumentException ex) {
+                    Logging.warn("FOSS map verify URL rejected by OkHttp: " + ex.getMessage(), ex);
+                    fossMapStyleUrlEdit.setError("invalid");
+                    hideProgressCenterFail(verify);
                 }
             });
-
         }
 
         if (fossMapStyleUrlEdit != null) {

@@ -777,6 +777,17 @@ public final class MappingFragment extends AbstractMappingFragment {
                     item.setTitle(wake);
                     return true;
                 }
+                case MENU_SWITCH_MAP_ENGINE: {
+                    final boolean useFoss = prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true);
+                    prefs.edit().putBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, !useFoss).apply();
+                    WiGLEToast.showOverActivity(a, R.string.tab_map,
+                            !useFoss ? "Switched to OpenStreetMap (Zero Key)" : "Switched to Google Maps",
+                            Toast.LENGTH_SHORT);
+                    if (a instanceof MainActivity) {
+                        ((MainActivity) a).selectFragment(R.id.nav_map);
+                    }
+                    return true;
+                }
             }
         }
         return false;

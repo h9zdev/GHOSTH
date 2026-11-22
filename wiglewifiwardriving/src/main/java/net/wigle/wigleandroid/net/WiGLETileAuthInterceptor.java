@@ -55,23 +55,21 @@ public class WiGLETileAuthInterceptor implements Interceptor {
     @NonNull
     @Override
     public Response intercept(@NotNull Chain chain) throws IOException {
-        Request request = chain.request();
-        String url = request.url().toString();
-        
-        // Only apply authentication to WiGLE tile requests (also HAAAACK)
+        final Request request = chain.request();
+        final String url = request.url().toString();
+        final Request.Builder requestBuilder = request.newBuilder();
+
+        // Always attach a valid User-Agent for OpenStreetMap and CartoDB tile server policies
+        requestBuilder.header("User-Agent", getUserAgent());
+
+        // Apply authentication if this is a WiGLE client tile request
         if (isWiGLETileRequest(url)) {
-            // DEBUG:
             Logging.info("WiGLE tile request: " + url);
-            Request.Builder requestBuilder = request.newBuilder();
-            
             if (credentials != null) {
                 requestBuilder.header("Authorization", credentials);
             }
-            
-            requestBuilder.header("User-Agent", getUserAgent());
-            request = requestBuilder.build();
         }
-        return chain.proceed(request);
+        return chain.proceed(requestBuilder.build());
     }
 
     /**

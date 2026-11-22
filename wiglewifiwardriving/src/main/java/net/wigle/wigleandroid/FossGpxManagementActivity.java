@@ -10,6 +10,7 @@ import android.widget.RelativeLayout;
 import net.wigle.wigleandroid.model.RouteDescriptor;
 import net.wigle.wigleandroid.util.FossConfigDialogUtil;
 import net.wigle.wigleandroid.util.Logging;
+import net.wigle.wigleandroid.util.MapStyleUtil;
 
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.Polyline;
@@ -70,27 +71,11 @@ public class FossGpxManagementActivity extends AbstractGpxManagementActivity {
         super.mapView = mapView;
         if (null != mapView) {
             mapView.getMapAsync(mapLibreMap -> {
-                final String mapServerKey = prefs != null ?
-                    prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
-                final String mapServerUrl = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_STYLE, null) : null;
-
-                //TODO: day/night style?
-                String styleUrl;
-                if (mapServerKey != null && !mapServerKey.isEmpty()) {
-                    styleUrl = mapServerUrl + mapServerKey;
-                } else {
-                    styleUrl = "asset://osm_raster_style.json";
-                }
-                try {
-                    mapLibreMap.setStyle(styleUrl);
+                MapStyleUtil.applyMapStyle(this, mapLibreMap, prefs, style -> {
                     mapLibreMap.setCameraPosition(
                             new CameraPosition.Builder().target(
                                     new LatLng(0.0, 0.0)).zoom(1.0).build());
-                } catch (RuntimeException styleEx) {
-                    Logging.error("Failed to apply FOSS GPX map style '" + styleUrl + "': ", styleEx);
-                    FossConfigDialogUtil.show(FossGpxManagementActivity.this, null);
-                }
+                });
             });
         } else {
             Logging.error("Failed to find mapView");

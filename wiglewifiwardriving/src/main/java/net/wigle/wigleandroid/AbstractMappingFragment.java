@@ -88,6 +88,7 @@ public abstract class AbstractMappingFragment extends Fragment {
     protected static final int MENU_TRAFFIC = 20;
     protected static final int MENU_MAP_TYPE = 21;
     protected static final int MENU_WAKELOCK = 22;
+    protected static final int MENU_SWITCH_MAP_ENGINE = 23;
     // ALIBI: 15% is actually pretty acceptable for map orientation.
     protected static final float MIN_BEARING_UPDATE_ACCURACY = 54.1f;
     protected static final String MAP_TILE_URL_FORMAT =
@@ -317,6 +318,10 @@ public abstract class AbstractMappingFragment extends Fragment {
             String nameDB = showNewDBOnly ? getString(R.string.menu_show_old) : getString(R.string.menu_show_new);
             item = menu.add(0, MENU_TOGGLE_NEWDB, 0, nameDB);
             item.setIcon(android.R.drawable.ic_menu_edit);
+
+            final boolean useFoss = prefs.getBoolean(PreferenceKeys.PREF_USE_FOSS_MAPS, true);
+            item = menu.add(0, MENU_SWITCH_MAP_ENGINE, 0, useFoss ? "Switch to Google Maps" : "Switch to OpenStreetMap (Zero Key)");
+            item.setIcon(android.R.drawable.ic_menu_rotate);
         }
         final String wake = MainActivity.isScreenLocked(this) ?
                 getString(R.string.menu_screen_sleep) : getString(R.string.menu_screen_wake);

@@ -17,6 +17,7 @@ import net.wigle.wigleandroid.model.api.CellSearchResponse;
 import net.wigle.wigleandroid.model.api.WiFiSearchResponse;
 import net.wigle.wigleandroid.util.FossConfigDialogUtil;
 import net.wigle.wigleandroid.util.Logging;
+import net.wigle.wigleandroid.util.MapStyleUtil;
 
 import org.maplibre.android.MapLibre;
 import org.maplibre.android.annotations.MarkerOptions;
@@ -83,29 +84,14 @@ public class FossDBResultActivity extends AbstractDBResultActivity {
             mapView.onCreate(savedInstanceState);
 
             mapView.getMapAsync(mapLibreMap -> {
-                final String mapServerKey = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_KEY, null) : null;
-                final String mapServerUrl = prefs != null ?
-                        prefs.getString(PREF_FOSS_MAPS_VECTOR_TILE_STYLE, null) : null;
-
-                //TODO: day/night style?
-                String styleUrl;
-                if (mapServerKey != null && !mapServerKey.isEmpty()) {
-                    styleUrl = mapServerUrl + mapServerKey;
-                } else {
-                    styleUrl = "asset://osm_raster_style.json";
-                }
-                try {
-                    mapLibreMap.setStyle(styleUrl);
-                } catch (RuntimeException styleEx) {
-                    Logging.error("Failed to apply FOSS map style '" + styleUrl + "': ", styleEx);
-                }
-                if (center != null) {
-                    final CameraPosition cameraPosition = new CameraPosition.Builder()
-                            .target(new LatLng(center.latitude, center.longitude))
-                            .zoom(DEFAULT_ZOOM).build();
-                    mapLibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-                }
+                MapStyleUtil.applyMapStyle(this, mapLibreMap, prefs, style -> {
+                    if (center != null) {
+                        final CameraPosition cameraPosition = new CameraPosition.Builder()
+                                .target(new LatLng(center.latitude, center.longitude))
+                                .zoom(DEFAULT_ZOOM).build();
+                        mapLibreMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                    }
+                });
             });
             final RelativeLayout rlView = findViewById(R.id.db_map_rl);
             if (rlView != null) {
