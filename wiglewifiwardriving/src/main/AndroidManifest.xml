@@ -118,6 +118,21 @@
             android:launchMode="singleTask"
             android:theme="@style/ChildActivityTheme"/>
         <activity
+            android:name=".intelligence.ui.IntelligenceActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="@string/tab_intelligence"
+            android:parentActivityName=".MainActivity"
+            android:theme="@style/ChildActivityTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="net.wigle.wigleandroid.MainActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+        <activity
             android:name=".DebugActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
             android:exported="false"

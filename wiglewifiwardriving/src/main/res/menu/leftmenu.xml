@@ -29,10 +29,10 @@
             android:contentDescription="@string/tab_hardware"
             />
         <item
-            android:id="@+id/nav_ml"
+            android:id="@+id/nav_intelligence"
             android:icon="@drawable/ic_device_cam"
-            android:title="@string/tab_ml"
-            android:contentDescription="@string/tab_ml"
+            android:title="@string/tab_intelligence"
+            android:contentDescription="@string/tab_intelligence"
             />
         <item
             android:id="@+id/nav_dash"

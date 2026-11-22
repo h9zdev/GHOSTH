@@ -119,6 +119,8 @@
     <string name="tab_map">Map</string>
     <string name="tab_radar">Radar</string>
     <string name="tab_hardware">External Hardware</string>
+    <string name="tab_intelligence">Intelligence</string>
+    <string name="intelligence_activity_name">Intelligence</string>
     <string name="tab_ml">ML &amp; Threat Intel</string>
     <string name="radar_title">Cyber Threat Radar</string>
     <string name="tab_dash">Dashboard</string>
