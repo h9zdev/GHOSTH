@@ -1,7 +1,7 @@
 package net.wigle.wigleandroid.intelligence.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -10,7 +10,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import net.wigle.wigleandroid.intelligence.model.AnalyzerType
 import net.wigle.wigleandroid.intelligence.model.Finding
@@ -34,9 +35,9 @@ fun ModuleDetailScreen(
         modifier = modifier
             .fillMaxSize()
             .background(CyberBackground)
-            .padding(12.dp)
+            .padding(16.dp)
     ) {
-        // Navigation Header
+        // Navigation Header - Flat, No Border
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -44,13 +45,13 @@ fun ModuleDetailScreen(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 IconButton(
                     onClick = onBackClick,
                     modifier = Modifier
-                        .size(36.dp)
-                        .border(1.dp, CyberBorder, RoundedCornerShape(4.dp))
+                        .size(40.dp)
+                        .background(CyberSurface, RoundedCornerShape(8.dp))
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
@@ -62,7 +63,7 @@ fun ModuleDetailScreen(
                 Column {
                     Text(
                         text = module.displayName.uppercase(),
-                        style = MaterialTheme.typography.headlineMedium,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = CyberCyan
                     )
                     Text(
@@ -73,70 +74,76 @@ fun ModuleDetailScreen(
                 }
             }
 
-            // Export action buttons
-            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                OutlinedButton(
-                    onClick = onExportCsv,
-                    shape = RoundedCornerShape(3.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(CyberCyan)
-                    )
+            // Export action buttons - Clean flat design, no border
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Box(
+                    modifier = Modifier
+                        .background(CyberCyan.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        .clickable { onExportCsv() }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("CSV", style = MaterialTheme.typography.labelSmall, color = CyberCyan)
+                    Text("CSV", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = CyberCyan)
                 }
 
-                OutlinedButton(
-                    onClick = onExportPdf,
-                    shape = RoundedCornerShape(3.dp),
-                    contentPadding = PaddingValues(horizontal = 8.dp, vertical = 2.dp),
-                    border = ButtonDefaults.outlinedButtonBorder.copy(
-                        brush = androidx.compose.ui.graphics.SolidColor(CyberPink)
-                    )
+                Box(
+                    modifier = Modifier
+                        .background(CyberPink.copy(alpha = 0.15f), RoundedCornerShape(8.dp))
+                        .clickable { onExportPdf() }
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text("PDF", style = MaterialTheme.typography.labelSmall, color = CyberPink)
+                    Text("PDF", style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold), color = CyberPink)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
-        // Time Filter Pills
+        // Time Filter Pills - Flat, No Border
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "TIME RANGE:",
-                style = MaterialTheme.typography.labelSmall,
+                text = "TIME:",
+                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
                 color = CyberCyan
             )
             TimeRange.values().forEach { range ->
                 val selected = (filterState.timeRange == range)
-                FilterChip(
-                    label = range.label,
-                    selected = selected,
-                    onClick = { onTimeRangeSelected(range) }
-                )
+                Box(
+                    modifier = Modifier
+                        .background(
+                            if (selected) CyberCyan.copy(alpha = 0.25f) else CyberSurface,
+                            RoundedCornerShape(8.dp)
+                        )
+                        .clickable { onTimeRangeSelected(range) }
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = range.label,
+                        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+                        color = if (selected) CyberCyan else CyberTextSecondary
+                    )
+                }
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(12.dp))
 
         // Map layer for this module
         SharedMapLayer(findings = findings)
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Spacer(modifier = Modifier.height(14.dp))
 
         // Findings count header
         Text(
             text = "FINDINGS (${findings.size})",
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             color = CyberCyan
         )
 
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Findings list
         FindingsList(
@@ -148,4 +155,3 @@ fun ModuleDetailScreen(
         )
     }
 }
-

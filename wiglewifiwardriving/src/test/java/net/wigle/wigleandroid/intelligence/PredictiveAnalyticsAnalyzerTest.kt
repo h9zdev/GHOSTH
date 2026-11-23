@@ -32,8 +32,9 @@ class PredictiveAnalyticsAnalyzerTest {
         assertFalse("Expected predictive findings", findings.isEmpty())
 
         val forecast = findings.find { it.analyzerType == AnalyzerType.PREDICTIVE_ANALYTICS }
-        assertNotNull("Should generate Density Forecast", forecast)
-        assertTrue(forecast!!.title.contains("Density Forecast"))
+        assertNotNull("Should generate TinyML Density Forecast", forecast)
+        assertTrue(forecast!!.title.contains("Forecast"))
+        assertTrue(forecast.details.contains("TinyML"))
+        assertTrue(forecast.score > 0.0)
     }
 }
-

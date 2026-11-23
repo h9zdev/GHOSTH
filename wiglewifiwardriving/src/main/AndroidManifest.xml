@@ -133,6 +133,69 @@
             </intent-filter>
         </activity>
         <activity
+            android:name=".intelligence.ui.DensityPredictionActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Wireless Density Prediction"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.AnomalyDetectionActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Anomaly Detection"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.SignalIntelligenceActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Signal Intelligence"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.TemporalIntelligenceActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Temporal Intelligence"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.MlClusteringActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="ML Clustering"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.GeospatialMlActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Geospatial ML"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".intelligence.ui.PredictiveAnalyticsActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Predictive Analytics"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".osint.ui.WirelessOsintActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Wireless OSINT"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
+            android:name=".osint.ui.GeospatialOsintActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
+            android:exported="true"
+            android:label="Geospatial OSINT"
+            android:parentActivityName=".intelligence.ui.IntelligenceActivity"
+            android:theme="@style/ChildActivityTheme" />
+        <activity
             android:name=".DebugActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|locale|screenSize"
             android:exported="false"
