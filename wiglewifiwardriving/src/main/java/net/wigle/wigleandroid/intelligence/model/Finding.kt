@@ -30,6 +30,8 @@ data class Finding(
     val bssid: String? = null,
     val ssid: String? = null,
     val score: Double = 0.0,
-    val details: String = ""
+    val details: String = "",
+    val category: String = "",
+    val recommendedAction: String = "",
+    val anomalyId: String = ""
 )
-

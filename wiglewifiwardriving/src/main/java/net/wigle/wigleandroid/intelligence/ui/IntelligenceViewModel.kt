@@ -4,15 +4,17 @@ import android.app.Application
 import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import net.wigle.wigleandroid.intelligence.export.ReportExporter
-import net.wigle.wigleandroid.intelligence.model.AnalyzerType
-import net.wigle.wigleandroid.intelligence.model.Finding
-import net.wigle.wigleandroid.intelligence.model.Observation
-import net.wigle.wigleandroid.intelligence.model.Severity
+import net.wigle.wigleandroid.intelligence.model.*
 import net.wigle.wigleandroid.intelligence.replay.ObservationReplayer
+import net.wigle.wigleandroid.intelligence.service.GridCell
 import net.wigle.wigleandroid.intelligence.service.IntelligenceEngine
+import net.wigle.wigleandroid.intelligence.service.ObservationPipeline
+import net.wigle.wigleandroid.intelligence.service.PipelineMetrics
+import net.wigle.wigleandroid.intelligence.ui.components.MapVisualizationMode
 import java.io.File
 
 enum class TimeRange(val label: String, val durationMs: Long) {
@@ -41,12 +43,14 @@ data class FilterState(
     val timeRange: TimeRange = TimeRange.ALL,
     val band: BandFilter = BandFilter.ALL,
     val security: SecurityFilter = SecurityFilter.ALL,
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val analysisRadiusMeters: Int = 100
 )
 
 class IntelligenceViewModel(application: Application) : AndroidViewModel(application) {
 
     private val engine = IntelligenceEngine.getInstance(application)
+    private val pipeline = ObservationPipeline.getInstance(application)
     private val replayer = ObservationReplayer(engine)
 
     private val _filterState = MutableStateFlow(FilterState())
@@ -54,6 +58,12 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
 
     private val _selectedModule = MutableStateFlow<AnalyzerType?>(null)
     val selectedModule: StateFlow<AnalyzerType?> = _selectedModule.asStateFlow()
+
+    private val _mapMode = MutableStateFlow(MapVisualizationMode.DENSITY_HEATMAP)
+    val mapMode: StateFlow<MapVisualizationMode> = _mapMode.asStateFlow()
+
+    private val _selectedSectionIndex = MutableStateFlow(0)
+    val selectedSectionIndex: StateFlow<Int> = _selectedSectionIndex.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
@@ -63,6 +73,10 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
 
     private val _statusNotice = MutableStateFlow<String?>(null)
     val statusNotice: StateFlow<String?> = _statusNotice.asStateFlow()
+
+    val pipelineMetrics: StateFlow<PipelineMetrics> = pipeline.pipelineMetrics
+    val gridCells: StateFlow<List<GridCell>> = pipeline.gridCells
+    val processedObservations: StateFlow<List<Observation>> = pipeline.processedObservations
 
     val rawFindings: StateFlow<List<Finding>> = engine.observeAllFindings()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
@@ -86,11 +100,44 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
             else finding.title.contains(filter.searchQuery, ignoreCase = true) ||
                     finding.summary.contains(filter.searchQuery, ignoreCase = true) ||
                     (finding.ssid?.contains(filter.searchQuery, ignoreCase = true) == true) ||
-                    (finding.bssid?.contains(filter.searchQuery, ignoreCase = true) == true)
+                    (finding.bssid?.contains(filter.searchQuery, ignoreCase = true) == true) ||
+                    finding.category.contains(filter.searchQuery, ignoreCase = true)
 
             moduleMatch && timeMatch && searchMatch
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    init {
+        // Automatically load and process actual application database records on start
+        refreshActualData()
+    }
+
+    /**
+     * Executes the pipeline against the application's actual SQLite database and live network cache.
+     */
+    fun refreshActualData() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                _isLoading.value = true
+                _errorMessage.value = null
+                _statusNotice.value = "Analyzing wireless database records..."
+                val metrics = pipeline.executePipeline(maxRecords = 5000)
+                _statusNotice.value = "Analysis complete: ${metrics.totalObservations} records, ${metrics.uniqueAccessPoints} APs evaluated."
+            } catch (e: Exception) {
+                _errorMessage.value = "Database analysis notice: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    fun setMapMode(mode: MapVisualizationMode) {
+        _mapMode.value = mode
+    }
+
+    fun selectSection(index: Int) {
+        _selectedSectionIndex.value = index
+    }
 
     fun selectModule(module: AnalyzerType?) {
         _selectedModule.value = module
@@ -110,6 +157,10 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
 
     fun setSearchQuery(query: String) {
         _filterState.update { it.copy(searchQuery = query) }
+    }
+
+    fun setAnalysisRadius(radiusMeters: Int) {
+        _filterState.update { it.copy(analysisRadiusMeters = radiusMeters) }
     }
 
     fun clearNotice() {
@@ -139,8 +190,15 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
                 _isLoading.value = true
                 _statusNotice.value = "Replaying passive session..."
 
-                val observations = sampleBatch ?: generateSamplePassiveStream()
-                replayer.replay(observations, batchSize = 10, delayMsBetweenBatches = 50) { processed, total, newFindings ->
+                val observations = sampleBatch ?: processedObservations.value.ifEmpty {
+                    emptyList()
+                }
+                if (observations.isEmpty()) {
+                    _statusNotice.value = "No recorded observations found in database to replay."
+                    return@launch
+                }
+
+                replayer.replay(observations, batchSize = 10, delayMsBetweenBatches = 40) { processed, total, newFindings ->
                     _statusNotice.value = "Processed $processed / $total observations (${newFindings.size} new findings)"
                 }
                 _statusNotice.value = "Replay complete: ${observations.size} observations evaluated."
@@ -171,80 +229,4 @@ class IntelligenceViewModel(application: Application) : AndroidViewModel(applica
             null
         }
     }
-
-    /**
-     * Generates a realistic passive observation stream for verification & testing
-     */
-    private fun generateSamplePassiveStream(): List<Observation> {
-        val list = mutableListOf<Observation>()
-        val baseLat = 37.7749
-        val baseLon = -122.4194
-        val now = System.currentTimeMillis()
-
-        // 1. High density cluster (Downtown transit station)
-        for (i in 1..16) {
-            list.add(
-                Observation(
-                    bssid = "00:1A:2B:3C:4D:%02X".format(i),
-                    ssid = if (i % 3 == 0) "Muni_Free_WiFi" else "ShopNet_$i",
-                    latitude = baseLat + (i * 0.00003),
-                    longitude = baseLon + (i * 0.00002),
-                    rssi = -55 - (i % 15),
-                    frequency = 2437,
-                    channel = 6,
-                    capabilities = "[WPA2-PSK-CCMP][ESS]",
-                    timestamp = now - (i * 1000)
-                )
-            )
-        }
-
-        // 2. Anomaly: Evil Twin with conflicting security capabilities
-        list.add(
-            Observation(
-                bssid = "A0:B1:C2:D3:E4:01",
-                ssid = "Metro_Gov_Secure",
-                latitude = baseLat + 0.002,
-                longitude = baseLon + 0.002,
-                rssi = -68,
-                frequency = 5180,
-                channel = 36,
-                capabilities = "[WPA3-SAE-CCMP][ESS]",
-                timestamp = now - 5000
-            )
-        )
-        list.add(
-            Observation(
-                bssid = "F0:E1:D2:C3:B4:99",
-                ssid = "Metro_Gov_Secure",
-                latitude = baseLat + 0.0021,
-                longitude = baseLon + 0.0021,
-                rssi = -42,
-                frequency = 2412,
-                channel = 1,
-                capabilities = "[ESS]", // OPEN rogue downgrade
-                timestamp = now - 3000
-            )
-        )
-
-        // 3. Anomaly: Sudden RSSI jump on stationary AP
-        val jumpBssid = "CC:DD:EE:11:22:33"
-        list.add(Observation(jumpBssid, "IoT_Sensor_Hub", baseLat - 0.001, baseLon - 0.001, rssi = -88, timestamp = now - 8000))
-        list.add(Observation(jumpBssid, "IoT_Sensor_Hub", baseLat - 0.001, baseLon - 0.001, rssi = -87, timestamp = now - 6000))
-        list.add(Observation(jumpBssid, "IoT_Sensor_Hub", baseLat - 0.001, baseLon - 0.001, rssi = -38, timestamp = now - 2000)) // +49 dBm spike
-
-        // 4. Sparse fringe area for density prediction interpolation
-        list.add(Observation("55:66:77:88:99:AA", "Remote_Cabin_Net", baseLat + 0.008, baseLon + 0.008, rssi = -82, timestamp = now - 10000))
-
-        // 5. Mobile AP (Vehicular Bus / Transit Hotspot) across distant coordinates
-        val busMac = "EE:AA:BB:CC:11:22"
-        list.add(Observation(busMac, "Muni_Transit_Bus_42", baseLat, baseLon, rssi = -64, channel = 1, timestamp = now - 9000))
-        list.add(Observation(busMac, "Muni_Transit_Bus_42", baseLat + 0.005, baseLon + 0.005, rssi = -62, channel = 1, timestamp = now - 4000)) // ~650m away
-
-        // 6. Wi-Fi 6E/7 (6 GHz) modern enterprise transmissions
-        list.add(Observation("00:AA:11:22:33:44", "TechHQ_6G_Ultra", baseLat + 0.001, baseLon + 0.001, rssi = -58, frequency = 6125, channel = 35, capabilities = "[WPA3-SAE-CCMP][ESS]", timestamp = now - 2000))
-        list.add(Observation("00:AA:11:22:33:45", "TechHQ_6G_Ultra", baseLat + 0.0012, baseLon + 0.0011, rssi = -60, frequency = 6285, channel = 67, capabilities = "[WPA3-SAE-CCMP][ESS]", timestamp = now - 1000))
-
-        return list
-    }
 }
-

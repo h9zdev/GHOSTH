@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [FindingEntity::class], version = 1, exportSchema = false)
+@Database(entities = [FindingEntity::class], version = 2, exportSchema = false)
 abstract class IntelligenceDatabase : RoomDatabase() {
     abstract fun findingDao(): FindingDao
 
@@ -24,4 +24,3 @@ abstract class IntelligenceDatabase : RoomDatabase() {
         }
     }
 }
-

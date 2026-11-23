@@ -20,7 +20,10 @@ data class FindingEntity(
     val bssid: String?,
     val ssid: String?,
     val score: Double,
-    val details: String
+    val details: String,
+    val category: String = "",
+    val recommendedAction: String = "",
+    val anomalyId: String = ""
 ) {
     fun toDomain(): Finding {
         return Finding(
@@ -35,7 +38,10 @@ data class FindingEntity(
             bssid = bssid,
             ssid = ssid,
             score = score,
-            details = details
+            details = details,
+            category = category,
+            recommendedAction = recommendedAction,
+            anomalyId = anomalyId
         )
     }
 
@@ -53,9 +59,11 @@ data class FindingEntity(
                 bssid = finding.bssid,
                 ssid = finding.ssid,
                 score = finding.score,
-                details = finding.details
+                details = finding.details,
+                category = finding.category,
+                recommendedAction = finding.recommendedAction,
+                anomalyId = finding.anomalyId
             )
         }
     }
 }
-

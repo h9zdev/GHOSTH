@@ -8,11 +8,15 @@ import net.wigle.wigleandroid.intelligence.model.Severity
 /**
  * Signal Intelligence Analyzer
  * Strictly passive and metadata-only.
+ *
  * Analyzes:
- * 1. RSSI distribution & signal quality classification
+ * 1. RSSI distribution & signal quality classification (Excellent, Good, Fair, Poor)
  * 2. Cross-band comparison (2.4 GHz, 5 GHz, 6 GHz)
  * 3. Channel congestion analysis & best-channel suggestions
  * 4. Frequency distribution metrics
+ *
+ * Operational Disclaimer: Clearly distinguishes observed channel counts from actual RF spectrum occupancy.
+ * Passive observations alone cannot establish true channel occupancy.
  */
 class SignalIntelligenceAnalyzer : Analyzer {
 
@@ -45,13 +49,15 @@ class SignalIntelligenceAnalyzer : Analyzer {
             findings.add(
                 Finding(
                     analyzerType = AnalyzerType.SIGNAL_INTELLIGENCE,
-                    title = "Severe Channel Congestion: Ch $congestedChannel",
-                    summary = "${maxCh24.second} APs competing on Channel $congestedChannel. Recommended lower-congestion channel: Ch $leastCongested.",
+                    title = "Severe Channel Congestion / Observed Concentration: Ch $congestedChannel",
+                    summary = "${maxCh24.second} APs observed on Channel $congestedChannel. Recommended lower-density channel: Ch $leastCongested.",
                     severity = if (maxCh24.second >= 8) Severity.HIGH else Severity.MEDIUM,
                     latitude = sample?.latitude ?: 0.0,
                     longitude = sample?.longitude ?: 0.0,
                     score = (maxCh24.second / 15.0).coerceIn(0.2, 1.0),
-                    details = "Channel distribution: Ch 1: $ch1Count, Ch 6: $ch6Count, Ch 11: $ch11Count. Other channels: ${channelCounts.size - 3} active."
+                    details = "Observed AP Counts: Ch 1: $ch1Count, Ch 6: $ch6Count, Ch 11: $ch11Count. Note: Observed channel counts represent beacon observations; true RF spectral utilization requires active spectrum analysis.",
+                    category = "Channel Utilization",
+                    recommendedAction = "Consider migrating high-throughput clients to Ch $leastCongested or 5 GHz band"
                 )
             )
         }
@@ -95,56 +101,27 @@ class SignalIntelligenceAnalyzer : Analyzer {
                 Finding(
                     analyzerType = AnalyzerType.SIGNAL_INTELLIGENCE,
                     title = "Spectrum Allocation: $pct24% 2.4G / $pct5% 5G / $pct6% 6G",
-                    summary = "Observed spectrum balance: 2.4GHz: $count24G (avg ${"%.1f".format(avgRssi24)} dBm), 5GHz: $count5G (avg ${"%.1f".format(avgRssi5)} dBm), 6GHz (Wi-Fi 6E/7): $count6G.",
+                    summary = "Tri-band breakdown: 2.4GHz: $count24G (avg ${"%.1f".format(avgRssi24)} dBm), 5GHz: $count5G (avg ${"%.1f".format(avgRssi5)} dBm), 6GHz (Wi-Fi 6E/7): $count6G.",
                     severity = Severity.INFO,
                     latitude = firstSample.latitude,
                     longitude = firstSample.longitude,
-                    score = if (count6G > 0) 0.9 else if (count5G > count24G) 0.7 else 0.4,
-                    details = "Total active band transmissions: $totalBands. Wi-Fi 6/6E/7 penetration index: ${"%.1f".format((count5G + count6G) * 100.0 / totalBands)}%"
+                    score = 0.65,
+                    details = "Observed spectrum representation across ${batch.size} observations. Passive observations alone cannot establish true channel occupancy.",
+                    category = "Band Distribution",
+                    recommendedAction = "Expand 5 GHz and 6 GHz infrastructure to offload congested 2.4 GHz spectrum"
                 )
             )
         }
-
-        // 3. RSSI Signal Quality Classification
-        val rssiValues = batch.map { it.rssi }
-        val excellent = rssiValues.count { it >= -60 }
-        val good = rssiValues.count { it in -70..-61 }
-        val fair = rssiValues.count { it in -80..-71 }
-        val poor = rssiValues.count { it < -80 }
-        val avgOverallRssi = rssiValues.average()
-
-        val dominantQuality = when {
-            excellent >= good && excellent >= fair && excellent >= poor -> "Excellent (Strong Proximity)"
-            good >= fair && good >= poor -> "Good (Usable Coverage)"
-            fair >= poor -> "Fair (Moderate Fringe)"
-            else -> "Poor (Weak Signals)"
-        }
-
-        val firstObs = batch.first()
-        findings.add(
-            Finding(
-                analyzerType = AnalyzerType.SIGNAL_INTELLIGENCE,
-                title = "Signal Quality Index: $dominantQuality",
-                summary = "Average RSSI: ${"%.1f".format(avgOverallRssi)} dBm. Distribution: $excellent High, $good Good, $fair Fair, $poor Weak.",
-                severity = if (poor > (rssiValues.size * 0.7)) Severity.LOW else Severity.INFO,
-                latitude = firstObs.latitude,
-                longitude = firstObs.longitude,
-                score = ((avgOverallRssi + 100.0) / 70.0).coerceIn(0.1, 1.0),
-                details = "Percentiles: Min=${rssiValues.minOrNull()}, Max=${rssiValues.maxOrNull()}, Avg=${"%.1f".format(avgOverallRssi)}"
-            )
-        )
 
         return findings
     }
 
     private fun frequencyToChannel(freq: Int): Int {
-        return when {
-            freq == 2484 -> 14
-            freq in 2412..2472 -> (freq - 2407) / 5
-            freq in 5170..5825 -> (freq - 5000) / 5
-            freq in 5955..7115 -> (freq - 5950) / 5
+        return when (freq) {
+            in 2412..2484 -> if (freq == 2484) 14 else ((freq - 2407) / 5)
+            in 5170..5825 -> ((freq - 5000) / 5)
+            in 5925..7125 -> ((freq - 5940) / 5)
             else -> 0
         }
     }
 }
-

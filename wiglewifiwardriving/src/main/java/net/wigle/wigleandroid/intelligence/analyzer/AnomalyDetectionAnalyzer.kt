@@ -11,17 +11,17 @@ import kotlin.math.sqrt
 /**
  * Anomaly Detection Analyzer (HIGH PRIORITY)
  * Strictly passive and metadata-only.
- * Uses classical EWMA (Exponentially Weighted Moving Average), Z-score thresholds,
- * and multi-dimensional consistency checking to flag:
- * 1. Sudden signal-strength changes (Z-score > 2.5, EWMA divergence > 25 dBm)
- * 2. Duplicate or inconsistent access point records (Evil Twin / Rogue AP / Encryption downgrades)
- * 3. Channel/band inconsistencies
- * 4. Unusual MAC address observation patterns (spoofing / rapid rotation)
+ *
+ * Detects:
+ * 1. Observation Anomalies: Duplicate records, inconsistent metadata, invalid coords, unusual frequency changes, timestamp inconsistencies.
+ * 2. Signal Anomalies: Sudden signal measurement shifts, unusual RSSI variations (>2.5σ), cross-band jumps.
+ *
+ * Note: An unusual observation is not proof of an attack.
  */
 class AnomalyDetectionAnalyzer(
     private val alphaEwma: Double = 0.3,
     private val zScoreThreshold: Double = 2.5,
-    private val suddenRssiJumpThreshold: Int = 24
+    private val suddenRssiJumpThreshold: Int = 20
 ) : Analyzer {
 
     data class BssidStats(
@@ -29,26 +29,96 @@ class AnomalyDetectionAnalyzer(
         var variance: Double,
         var lastLat: Double,
         var lastLon: Double,
+        var lastTime: Long,
         var lastChannel: Int,
         var lastCapabilities: String,
         var observationCount: Int = 1
     )
 
-    // In-memory EWMA state tracker for baseline smoothing across observations
     private val bssidHistory = ConcurrentHashMap<String, BssidStats>()
+    private var anomalyCounter = 0
 
     override suspend fun analyze(batch: List<Observation>): List<Finding> {
         if (batch.isEmpty()) return emptyList()
 
         val findings = mutableListOf<Finding>()
+        val now = System.currentTimeMillis()
 
-        // 1. Inconsistent & Duplicate AP Records (Evil Twin / Capability Downgrade)
-        // Group by SSID to detect rogue duplicate APs with conflicting capabilities
+        // 1. Observation Metadata & Duplicate Checks
+        val seenSignatures = mutableSetOf<String>()
+        for (obs in batch) {
+            val sig = "${obs.bssid}:${obs.timestamp}:${"%.5f".format(obs.latitude)}:${"%.5f".format(obs.longitude)}"
+            if (!seenSignatures.add(sig)) {
+                val aid = "ANOM-DUP-${++anomalyCounter}"
+                findings.add(
+                    Finding(
+                        analyzerType = AnalyzerType.ANOMALY_DETECTION,
+                        title = "Duplicate Record Detected: ${obs.bssid}",
+                        summary = "Identical BSSID, timestamp, and coordinates detected. Retaining original evidence while flagging duplication.",
+                        severity = Severity.LOW,
+                        latitude = obs.latitude,
+                        longitude = obs.longitude,
+                        bssid = obs.bssid,
+                        ssid = obs.ssid,
+                        score = 0.70,
+                        details = "Timestamp: ${obs.timestamp}, Coords: (${obs.latitude}, ${obs.longitude}). Cause: Scanner re-buffering or dual-interface reception.",
+                        category = "Duplicate Record",
+                        recommendedAction = "Deduplicate observation records while preserving audit log",
+                        anomalyId = aid
+                    )
+                )
+            }
+
+            // Invalid Coordinates Check
+            if (obs.latitude == 0.0 && obs.longitude == 0.0) {
+                val aid = "ANOM-GEO-${++anomalyCounter}"
+                findings.add(
+                    Finding(
+                        analyzerType = AnalyzerType.ANOMALY_DETECTION,
+                        title = "Null Coordinate Observation: ${obs.bssid}",
+                        summary = "Observation logged without valid GNSS fix (0.0, 0.0).",
+                        severity = Severity.LOW,
+                        latitude = 0.0,
+                        longitude = 0.0,
+                        bssid = obs.bssid,
+                        ssid = obs.ssid,
+                        score = 0.60,
+                        details = "GPS satellite lock was pending or obscured during RF capture. Non-malicious.",
+                        category = "Coordinate Anomaly",
+                        recommendedAction = "Verify GNSS constellation visibility and GPS fix state",
+                        anomalyId = aid
+                    )
+                )
+            }
+
+            // Timestamp Disparity
+            if (obs.timestamp > now + 60_000L || obs.timestamp < 1104537600000L) {
+                val aid = "ANOM-TIME-${++anomalyCounter}"
+                findings.add(
+                    Finding(
+                        analyzerType = AnalyzerType.ANOMALY_DETECTION,
+                        title = "Timestamp Disparity: ${obs.bssid}",
+                        summary = "Observation timestamp (${obs.timestamp}) lies outside the expected timeline epoch.",
+                        severity = Severity.MEDIUM,
+                        latitude = obs.latitude,
+                        longitude = obs.longitude,
+                        bssid = obs.bssid,
+                        ssid = obs.ssid,
+                        score = 0.80,
+                        details = "Likely host system clock synchronization drift or NTP uninitialized state.",
+                        category = "Timestamp Disparity",
+                        recommendedAction = "Synchronize device system clock via NTP/GPS time",
+                        anomalyId = aid
+                    )
+                )
+            }
+        }
+
+        // 2. Inconsistent Metadata (Capability Disparity across Same SSID & MAC Mutation)
         val ssidGroups = batch.filter { it.ssid.isNotBlank() }.groupBy { it.ssid }
         for ((ssid, obsList) in ssidGroups) {
             val bssidsForSsid = obsList.map { it.bssid }.distinct()
             if (bssidsForSsid.size > 1) {
-                // Check if capabilities are conflicting across different BSSIDs sharing the same SSID
                 val capsMap = obsList.groupBy { it.capabilities }
                 if (capsMap.size > 1) {
                     val openOrWep = capsMap.keys.find { caps ->
@@ -60,18 +130,22 @@ class AnomalyDetectionAnalyzer(
 
                     if (openOrWep != null && secure != null) {
                         val rogueObs = obsList.first { it.capabilities == openOrWep }
+                        val aid = "ANOM-CAP-${++anomalyCounter}"
                         findings.add(
                             Finding(
                                 analyzerType = AnalyzerType.ANOMALY_DETECTION,
                                 title = "Potential Rogue AP / Evil Twin: '$ssid'",
-                                summary = "Observed matching SSID '$ssid' with contradictory security. Secure ($secure) vs Downgraded ($openOrWep).",
+                                summary = "Observed matching SSID with contradictory security capabilities: Secure ($secure) vs Open/Legacy ($openOrWep). Note: Unusual observation is not proof of an attack.",
                                 severity = Severity.CRITICAL,
                                 latitude = rogueObs.latitude,
                                 longitude = rogueObs.longitude,
                                 bssid = rogueObs.bssid,
                                 ssid = ssid,
                                 score = 0.95,
-                                details = "Conflicting BSSIDs: ${bssidsForSsid.joinToString(", ")}. Capabilities disparity: '$secure' vs '$openOrWep'."
+                                details = "Conflicting BSSIDs: ${bssidsForSsid.joinToString(", ")}. Note: An unusual observation is not proof of an attack. May be a captive portal, guest subnet, or legacy repeater.",
+                                category = "Observation Metadata",
+                                recommendedAction = "Review network capability configuration and verify dual-SSID deployments",
+                                anomalyId = aid
                             )
                         )
                     }
@@ -91,82 +165,89 @@ class AnomalyDetectionAnalyzer(
                             bssid = sample.bssid,
                             ssid = ssid,
                             score = 0.85,
-                            details = "Observed BSSIDs: ${bssidsForSsid.take(6).joinToString(", ")} (total: ${bssidsForSsid.size})"
+                            details = "Observed BSSIDs: ${bssidsForSsid.take(6).joinToString(", ")} (total: ${bssidsForSsid.size})",
+                            category = "MAC Mutation",
+                            recommendedAction = "Verify if private MAC address rotation is active on clients or virtual APs",
+                            anomalyId = "ANOM-MAC-${++anomalyCounter}"
                         )
                     )
                 }
             }
         }
 
-        // 2. Sudden Signal Measurement Shifts & Inconsistent Channel Records
+        // 3. Signal Anomalies & Channel Jumps (EWMA Baseline & Z-Score Variance)
         for (obs in batch) {
             val stats = bssidHistory[obs.bssid]
             if (stats == null) {
                 bssidHistory[obs.bssid] = BssidStats(
                     ewmaRssi = obs.rssi.toDouble(),
-                    variance = 4.0, // Initial nominal variance
+                    variance = 4.0,
                     lastLat = obs.latitude,
                     lastLon = obs.longitude,
+                    lastTime = obs.timestamp,
                     lastChannel = obs.channel,
-                    lastCapabilities = obs.capabilities,
-                    observationCount = 1
+                    lastCapabilities = obs.capabilities
                 )
             } else {
-                // Channel / Band Jump Inconsistency Check
-                if (stats.lastChannel != 0 && obs.channel != 0 && stats.lastChannel != obs.channel) {
-                    val bandA = if (stats.lastChannel <= 14) "2.4GHz" else "5GHz/6GHz"
-                    val bandB = if (obs.channel <= 14) "2.4GHz" else "5GHz/6GHz"
-                    if (bandA != bandB) {
+                // Cross-band jump check
+                if (stats.lastChannel > 0 && obs.channel > 0) {
+                    val was24 = stats.lastChannel in 1..14
+                    val is5or6 = obs.channel > 14
+                    if (was24 && is5or6) {
                         findings.add(
                             Finding(
                                 analyzerType = AnalyzerType.ANOMALY_DETECTION,
-                                title = "Inconsistent Channel / Band Jump",
-                                summary = "BSSID ${obs.bssid} jumped cross-band from ch ${stats.lastChannel} ($bandA) to ch ${obs.channel} ($bandB).",
+                                title = "Inconsistent Channel / Band Jump: ${obs.bssid}",
+                                summary = "BSSID shifted abruptly across bands from 2.4GHz (Ch ${stats.lastChannel}) to 5GHz/6GHz (Ch ${obs.channel}).",
                                 severity = Severity.MEDIUM,
                                 latitude = obs.latitude,
                                 longitude = obs.longitude,
                                 bssid = obs.bssid,
                                 ssid = obs.ssid,
-                                score = 0.70,
-                                details = "Cross-band transition without re-association delay. Prior channel: ${stats.lastChannel}, current: ${obs.channel}."
+                                score = 0.75,
+                                details = "Cross-band transition observed for identical hardware address.",
+                                category = "Observation Metadata",
+                                recommendedAction = "Verify dual-band single-MAC radio architecture",
+                                anomalyId = "ANOM-BAND-${++anomalyCounter}"
                             )
                         )
                     }
                 }
 
-                // EWMA & Z-Score Sudden RSSI Shift Check
-                val diff = obs.rssi - stats.ewmaRssi
-                val stdDev = sqrt(stats.variance).coerceAtLeast(1.0)
-                val zScore = diff / stdDev
+                val deltaRssi = obs.rssi - stats.ewmaRssi
+                val stdDev = sqrt(stats.variance.coerceAtLeast(1.0))
+                val zScore = if (stdDev > 0) abs(deltaRssi) / stdDev else 0.0
 
-                if (abs(diff) >= suddenRssiJumpThreshold || abs(zScore) >= zScoreThreshold) {
-                    val direction = if (diff > 0) "surge" else "drop"
-                    val severity = if (abs(diff) >= 30) Severity.HIGH else Severity.MEDIUM
+                // Sudden RSSI Jump or Z-Score threshold exceeded
+                if (abs(deltaRssi) >= suddenRssiJumpThreshold || zScore >= zScoreThreshold) {
+                    val aid = "ANOM-SIG-${++anomalyCounter}"
                     findings.add(
                         Finding(
                             analyzerType = AnalyzerType.ANOMALY_DETECTION,
-                            title = "Sudden Signal Measurement Shift (${obs.rssi} dBm)",
-                            summary = "BSSID ${obs.bssid} ('${obs.ssid}') exhibited sudden $direction of ${"%.1f".format(abs(diff))} dBm (z-score: ${"%.2f".format(zScore)}).",
-                            severity = severity,
+                            title = "Sudden Signal Measurement Shift / Unusual RSSI Variation: ${obs.bssid}",
+                            summary = "Sudden ${"%.1f".format(deltaRssi)} dBm RSSI deviation (Z=${"%.2f".format(zScore)}σ) from smoothed baseline (${"%.1f".format(stats.ewmaRssi)} dBm).",
+                            severity = if (abs(deltaRssi) > 35) Severity.HIGH else Severity.MEDIUM,
                             latitude = obs.latitude,
                             longitude = obs.longitude,
                             bssid = obs.bssid,
                             ssid = obs.ssid,
-                            score = (abs(zScore) / 4.0).coerceIn(0.5, 1.0),
-                            details = "Current RSSI: ${obs.rssi} dBm, Prior EWMA Baseline: ${"%.1f".format(stats.ewmaRssi)} dBm, StdDev: ${"%.2f".format(stdDev)}."
+                            score = (zScore / 5.0).coerceIn(0.5, 0.95),
+                            details = "Observed: ${obs.rssi} dBm, Baseline: ${"%.1f".format(stats.ewmaRssi)} dBm, StdDev: ${"%.1f".format(stdDev)}. Multipath reflections or movement are common causes.",
+                            category = "Signal Variance",
+                            recommendedAction = "Recalibrate signal baseline and check for physical obstructions",
+                            anomalyId = aid
                         )
                     )
                 }
 
-                // Update EWMA and Variance
-                val oldMean = stats.ewmaRssi
-                stats.ewmaRssi = (alphaEwma * obs.rssi) + ((1.0 - alphaEwma) * stats.ewmaRssi)
-                val error = obs.rssi - oldMean
-                stats.variance = ((1.0 - alphaEwma) * stats.variance) + (alphaEwma * error * error)
+                // Update EWMA & Variance
+                stats.ewmaRssi = (1 - alphaEwma) * stats.ewmaRssi + alphaEwma * obs.rssi
+                val newDiff = obs.rssi - stats.ewmaRssi
+                stats.variance = (1 - alphaEwma) * stats.variance + alphaEwma * (newDiff * newDiff)
                 stats.lastLat = obs.latitude
                 stats.lastLon = obs.longitude
+                stats.lastTime = obs.timestamp
                 stats.lastChannel = obs.channel
-                stats.lastCapabilities = obs.capabilities
                 stats.observationCount++
             }
         }
@@ -174,11 +255,8 @@ class AnomalyDetectionAnalyzer(
         return findings
     }
 
-    /**
-     * Clear cached EWMA state (e.g. for fresh replay or unit tests)
-     */
     fun resetState() {
         bssidHistory.clear()
+        anomalyCounter = 0
     }
 }
-

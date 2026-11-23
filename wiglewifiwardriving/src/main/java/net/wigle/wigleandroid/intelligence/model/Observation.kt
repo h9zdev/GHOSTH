@@ -7,6 +7,14 @@ enum class NetworkType {
     UNKNOWN
 }
 
+enum class DataQualityStatus(val label: String) {
+    NORMAL("Normal"),
+    INCONSISTENT("Inconsistent"),
+    DUPLICATE("Duplicate"),
+    INCOMPLETE("Incomplete"),
+    REQUIRES_REVIEW("Requires Review")
+}
+
 /**
  * Passive observation metadata.
  * Strictly passive and metadata-only: no payload capture, no network connection.
@@ -23,6 +31,8 @@ data class Observation(
     val capabilities: String = "",
     val timestamp: Long = System.currentTimeMillis(),
     val type: NetworkType = NetworkType.WIFI,
-    val vendor: String? = null
+    val vendor: String? = null,
+    val qualityStatus: DataQualityStatus = DataQualityStatus.NORMAL,
+    val qualityIssues: List<String> = emptyList(),
+    val isEstimatedOrPredicted: Boolean = false
 )
-
