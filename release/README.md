@@ -69,3 +69,4 @@ Once flashed, the board operates in dual mode (USB + Wi-Fi):
 2. Open browser and go to: `http://192.168.4.1` (or tap **OPEN WEB CONFIG** in the app's External Hardware screen).
 3. Enter your custom SSID and password.
 4. Tap **SAVE & REBOOT**. The new credentials will be saved to EEPROM.
+

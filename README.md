@@ -157,6 +157,9 @@ Implemented in `ObservationPipeline.kt`, running a 9-step workflow:
 
 ## 📷 Flock ALPR & NodeMCU Hardware Subsystem
 
+> [!TIP]
+> For the complete step-by-step hardware wiring, flashing, and troubleshooting guide, see the **[NodeMCU Setup & Troubleshooting Wiki](wiki/NodeMCU-Companion-Guide.md)**.
+
 Flock Safety ALPR (Automatic License Plate Recognition) cameras use **high-power 850nm / 940nm pulsed infrared LED strobes** flashing at camera shutter sync frequencies ($30\text{--}60\,\text{Hz}$) to capture license plates in all lighting conditions.
 
 ```mermaid
