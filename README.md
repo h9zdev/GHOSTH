@@ -4,6 +4,7 @@
 <p align="center">
   <img src="https://github.com/h9zdev/GHOSTH/blob/main/GHOSTH.png" alt="GHOSTH" />
 </p>
+<div align="center">
 
 <br>
 
@@ -14,83 +15,25 @@
 
 <br>
 
+</div>
+
 **GhostH** (`droid.wardriver.hx.os`) is an advanced Android platform for wardriving, RF signal intelligence, and wireless spatial analytics. Built on the proven WiGLE Android core, it adds a passive machine learning and spatial analytics engine, offline OpenStreetMap vector mapping, and a purpose-built dark interface for field use. An external NodeMCU companion subsystem provides multi-channel RF harvesting and optical infrared strobe detection (Flock ALPR), and a cross-platform desktop suite supports Windows and Linux.
 
-## 📑 Table of Contents
-- [Quick Links & Downloads](#-quick-links--downloads)
-- [System Architecture](#-system-architecture)
-- [Android App Installation & Setup](#-android-app-installation--setup)
-  - [Prerequisites](#prerequisites)
-  - [Option A: Install Pre-built APK](#option-a-install-pre-built-apk)
-  - [Option B: Build APK from Source](#option-b-build-apk-from-source)
-  - [Initial Android App Permissions & Settings](#initial-android-app-permissions--settings)
-  - [WiGLE API Credentials Configuration](#wigle-api-credentials-configuration)
-- [NodeMCU Companion Firmware (ESP8266) Setup](#-nodemcu-companion-firmware-esp8266-setup)
-  - [Hardware Requirements](#hardware-requirements)
-  - [USB Drivers (Linux & Windows)](#usb-drivers-linux--windows)
-  - [Option A: Fast Flash via esptool (Binary)](#option-a-fast-flash-via-esptool-binary)
-  - [Option B: Build and Flash from Source](#option-b-build-and-flash-from-source)
-  - [SoftAP & HayOS Tactical Web Portal](#softap--hayos-tactical-web-portal)
-  - [Connecting NodeMCU to the Android App](#connecting-nodemcu-to-the-android-app)
-- [Desktop Suite (Windows & Linux) Setup](#-desktop-suite-windows--linux-setup)
-  - [Key Capabilities](#key-capabilities)
-  - [Running on Linux](#running-on-linux)
-  - [Running on Windows](#running-on-windows)
-  - [Running from Source Code](#running-from-source-code)
-  - [Two-Way Mobile Sync (App to PC)](#two-way-mobile-sync-app-to-pc)
-  - [Desktop Direct WiGLE Uploader](#desktop-direct-wigle-uploader)
-- [Wireless Intelligence & ML Analytics Engine](#-wireless-intelligence--ml-analytics-engine)
-- [Troubleshooting & FAQ](#-troubleshooting--faq)
-- [Passive Operational Principles & Disclaimer](#-passive-operational-principles--disclaimer)
-- [Attributions & License](#-attributions--license)
+<div align="center">
 
----
+<br>
 
-## 🔗 Quick Links & Downloads
+[![Download APK](https://img.shields.io/badge/Download-Android%20APK-brightgreen.svg?style=flat-square&logo=android&logoColor=white)](https://github.com/h9zdev/GHOSTH/releases/download/v2.0.0/GhostH-Wardrive.apk)
+[![Download Linux](https://img.shields.io/badge/Download-Desktop%20Linux-blue.svg?style=flat-square&logo=linux&logoColor=white)](https://github.com/h9zdev/GHOSTH/releases/download/v2.0.0/GhostH-Desktop-Linux.tar.gz)
+[![Download Windows](https://img.shields.io/badge/Download-Desktop%20Windows-0078D6.svg?style=flat-square&logo=windows&logoColor=white)](https://github.com/h9zdev/GHOSTH/releases/download/v2.0.0/GhostH-Desktop-Windows.zip)
+[![Download Firmware](https://img.shields.io/badge/Download-NodeMCU%20Firmware-orange.svg?style=flat-square&logo=espressif&logoColor=white)](https://github.com/h9zdev/GHOSTH/releases/download/v2.0.0/nodemcu_ghosth_firmware.bin)
 
-* 📦 **[Latest Releases & Binary Downloads (v2.0.0)](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0)**
-  * `GhostH-Wardrive.apk` — Android application package
-  * `nodemcu_ghosth_firmware.bin` — Compiled NodeMCU companion firmware
-  * `nodemcu_ghosth_source.zip` — NodeMCU Arduino source package
-  * `GhostH-Desktop-Linux.tar.gz` — Standalone executable for Linux (x86_64)
-  * `GhostH-Desktop-Windows.zip` — Standalone executable for Windows (x64)
-  * `GhostH-Desktop-Source.zip` — Python source code for the desktop suite
+<br>
+
+</div>
+
 * 📖 **[GhostH Official GitHub Wiki](https://github.com/h9zdev/GHOSTH/wiki)**
 * 🌐 **[Developer Website](https://haybnz.web.app/)**
-
----
-
-## 🏗 System Architecture
-
-```text
-┌────────────────────────────────────────────────────────┐
-│               ESP8266 NodeMCU Companion                │
-│  - Continuous 2.4 GHz RF Ingest (Channels 1 - 13)      │
-│  - Optical IR Strobe Discriminator (Flock ALPR 25-65Hz) │
-│  - SoftAP: "GhostH" (192.168.4.1) / TCP Port 8888      │
-│  - Web Portal: HayOS Dark Tactical UI                  │
-└───────────────┬────────────────────────┬───────────────┘
-                │ USB Serial             │ Wi-Fi Stream
-                │ (115200 baud)          │ (TCP :8888)
-                ▼                        ▼
-┌───────────────────────────────┐  ┌───────────────────────────────┐
-│       GhostH Android App      │  │     GhostH Desktop Suite      │
-│     (droid.wardriver.hx.os)   │  │       (Windows / Linux)       │
-│  - Passive ML Analytics (7)   │  │  - USB Serial & Wi-Fi Ingest  │
-│  - FOSS OpenStreetMap Vector  │  │  - LAN Network Sync (:8889)   │
-│  - Cyberpunk Radar HUD Canvas │  │  - Direct WiGLE API Uploader  │
-│  - WiGLE CSV Exporter         │  │  - WiGLE CSV Exporter (v1.4)  │
-└───────────────┬───────────────┘  └───────────────┬───────────────┘
-                │                                  │
-                │     Local LAN Sync (Port 8889)   │
-                └──────────────────────────────────┘
-                                │
-                                ▼
-                ┌───────────────────────────────┐
-                │          WiGLE.net            │
-                │  (Excludes "GHOSTH" SSID)     │
-                └───────────────────────────────┘
-```
 
 ---
 
