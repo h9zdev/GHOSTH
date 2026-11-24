@@ -515,6 +515,13 @@ public class ObservationUploader extends AbstractProgressApiRequest {
                     continue;
                 }
 
+                // Filter out GhostH companion access point by Wi-Fi name (SSID), not by MAC
+                final String netSsid = network.getSsid();
+                if ( netSsid != null && netSsid.trim().toUpperCase(Locale.US).contains("GHOSTH") ) {
+                    Logging.info("Skipping upload of internal companion network by SSID: " + netSsid);
+                    continue;
+                }
+
                 countStats.lineCount++;
                 // ListActivity.debug("writing network: " + ssid );
 

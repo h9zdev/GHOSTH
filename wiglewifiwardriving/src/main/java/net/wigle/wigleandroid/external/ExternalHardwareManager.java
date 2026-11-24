@@ -350,6 +350,9 @@ public class ExternalHardwareManager {
                     for (Network net : MainActivity.getNetworkCache().values()) {
                         String bssid = net.getBssid();
                         String ssid = net.getSsid();
+                        if (ssid != null && ssid.toUpperCase(Locale.US).contains("GHOSTH")) {
+                            continue; // Exclude internal companion network by Wi-Fi name
+                        }
                         int freq = net.getFrequency();
                         String caps = net.getCapabilities();
                         int level = net.getLevel();
