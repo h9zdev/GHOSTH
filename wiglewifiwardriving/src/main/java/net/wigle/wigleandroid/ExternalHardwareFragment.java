@@ -26,6 +26,7 @@ import java.util.Locale;
 /**
  * Fragment dedicated strictly to External Hardware:
  * - NodeMCU GhostH Promiscuous Sniffer & Optical Flock ALPR Detector (USB Serial OTG & Wi-Fi AP 192.168.4.1)
+ * - GhostH Desktop Suite Local Network Synchronization & WiGLE Uploader (Port 8889)
  * - ESP32 Promiscuous Sniffer (Bluetooth SPP)
  * - Raspberry Pi / Kali Companion (TCP stream for Kismet/airodump/gpsd)
  * - RTL-SDR stream (rtl_tcp)
@@ -44,6 +45,14 @@ public class ExternalHardwareFragment extends Fragment implements ExternalHardwa
     private Button btnScanUsb;
     private Button btnConnectGhosthWifi;
     private Button btnOpenGhosthPortal;
+
+    // Desktop Suite UI
+    private TextView desktopStatusBadge;
+    private EditText editDesktopHost;
+    private EditText editDesktopPort;
+    private Button btnConnectDesktop;
+    private Button btnSyncDesktop;
+    private Button btnUploadWigleDesktop;
 
     // ESP32 UI
     private TextView esp32StatusBadge;
@@ -89,6 +98,14 @@ public class ExternalHardwareFragment extends Fragment implements ExternalHardwa
         btnScanUsb = view.findViewById(R.id.btn_scan_usb);
         btnConnectGhosthWifi = view.findViewById(R.id.btn_connect_ghosth_wifi);
         btnOpenGhosthPortal = view.findViewById(R.id.btn_open_ghosth_portal);
+
+        // Desktop Suite
+        desktopStatusBadge = view.findViewById(R.id.desktop_status_badge);
+        editDesktopHost = view.findViewById(R.id.edit_desktop_host);
+        editDesktopPort = view.findViewById(R.id.edit_desktop_port);
+        btnConnectDesktop = view.findViewById(R.id.btn_connect_desktop);
+        btnSyncDesktop = view.findViewById(R.id.btn_sync_desktop);
+        btnUploadWigleDesktop = view.findViewById(R.id.btn_upload_wigle_desktop);
 
         // ESP32
         esp32StatusBadge = view.findViewById(R.id.esp32_status_badge);
@@ -153,7 +170,7 @@ public class ExternalHardwareFragment extends Fragment implements ExternalHardwa
             });
         });
 
-        // 3. Open NodeMCU Web Portal (http://192.168.4.1) in Browser to Change SSID / Password
+        // 3. Open NodeMCU Web Portal in Browser
         btnOpenGhosthPortal.setOnClickListener(v -> {
             try {
                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://192.168.4.1"));
@@ -161,6 +178,57 @@ public class ExternalHardwareFragment extends Fragment implements ExternalHardwa
             } catch (Exception ex) {
                 Toast.makeText(getContext(), "Unable to open browser: " + ex.getMessage(), Toast.LENGTH_SHORT).show();
             }
+        });
+
+        // 4. GhostH Desktop Suite Sync Connect
+        btnConnectDesktop.setOnClickListener(v -> {
+            if (hardwareManager.isDesktopConnected()) {
+                hardwareManager.disconnectDesktopApp();
+                appendLog("[DESKTOP] Disconnected from Desktop Suite.");
+                updateStatusUi();
+                return;
+            }
+            String host = editDesktopHost.getText().toString().trim();
+            if (host.isEmpty()) host = "192.168.4.2";
+            int port = 8889;
+            try {
+                String pStr = editDesktopPort.getText().toString().trim();
+                if (!pStr.isEmpty()) port = Integer.parseInt(pStr);
+            } catch (Exception ignored) {
+            }
+
+            final String fHost = host;
+            final int fPort = port;
+            appendLog(String.format(Locale.US, "[DESKTOP] Connecting to Desktop Suite at %s:%d...", fHost, fPort));
+            hardwareManager.connectDesktopApp(fHost, fPort, (success, message) -> {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[DESKTOP] " + message);
+                    updateStatusUi();
+                });
+            });
+        });
+
+        // 5. Sync Observations to Desktop
+        btnSyncDesktop.setOnClickListener(v -> {
+            appendLog("[DESKTOP] Transmitting local observations to Desktop Suite...");
+            hardwareManager.syncObservationsToDesktop((success, message) -> {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[DESKTOP] " + message);
+                });
+            });
+        });
+
+        // 6. Trigger Desktop WiGLE API Upload
+        btnUploadWigleDesktop.setOnClickListener(v -> {
+            appendLog("[DESKTOP] Requesting Desktop Suite to upload observations to WiGLE API...");
+            hardwareManager.triggerDesktopWigleUpload((success, message) -> {
+                handler.post(() -> {
+                    Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+                    appendLog("[DESKTOP] " + message);
+                });
+            });
         });
 
         // ESP32 Bluetooth SPP
@@ -259,6 +327,12 @@ public class ExternalHardwareFragment extends Fragment implements ExternalHardwa
             btnConnectGhosthWifi.setText("CONNECT GHOSTH WI-FI (192.168.4.1:8888)");
         }
         nodemcuPacketCount.setText(String.format(Locale.US, "Packets Ingested: %d", hardwareManager.getPacketsReceived()));
+
+        // Update Desktop Suite
+        boolean desktopConn = hardwareManager.isDesktopConnected();
+        desktopStatusBadge.setText(desktopConn ? "CONNECTED" : "DISCONNECTED");
+        desktopStatusBadge.setTextColor(desktopConn ? Color.parseColor("#00FF66") : Color.parseColor("#FF1F8F"));
+        btnConnectDesktop.setText(desktopConn ? "DISCONNECT DESKTOP SUITE" : "CONNECT TO DESKTOP SUITE");
 
         // Update ESP32
         boolean esp32Connected = hardwareManager.isEsp32Connected();

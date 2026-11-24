@@ -30,10 +30,12 @@ import net.wigle.wigleandroid.util.PreferenceKeys;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -45,7 +47,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Controller for External Companion Hardware.
  * Ingests promiscuous Wi-Fi frames from ESP8266/ESP32 companions (via USB Serial OTG / Wi-Fi AP / Bluetooth SPP),
- * Raspberry Pi / Kali monitor streams, and RTL-SDR receivers.
+ * Raspberry Pi / Kali monitor streams, RTL-SDR receivers, and bidirectional Desktop Suite synchronization.
  */
 public class ExternalHardwareManager {
 
@@ -64,12 +66,15 @@ public class ExternalHardwareManager {
     private final AtomicBoolean sdrConnected = new AtomicBoolean(false);
     private final AtomicBoolean usbConnected = new AtomicBoolean(false);
     private final AtomicBoolean ghostHConnected = new AtomicBoolean(false);
+    private final AtomicBoolean desktopConnected = new AtomicBoolean(false);
     private final AtomicLong packetsReceived = new AtomicLong(0);
 
     private BluetoothSocket btSocket;
     private Socket piSocket;
     private Socket sdrSocket;
     private Socket ghostHSocket;
+    private Socket desktopSocket;
+    private PrintWriter desktopWriter;
     private UsbSerialPort usbSerialPort;
 
     public interface ConnectionCallback {
@@ -116,6 +121,10 @@ public class ExternalHardwareManager {
         return ghostHConnected.get();
     }
 
+    public boolean isDesktopConnected() {
+        return desktopConnected.get();
+    }
+
     public long getEsp32PacketsReceived() {
         return packetsReceived.get();
     }
@@ -146,7 +155,6 @@ public class ExternalHardwareManager {
 
     /**
      * Scan and Connect directly to NodeMCU / ESP8266 / ESP32 via USB Serial (OTG).
-     * Supports CH340, CP2102, FTDI, and CDC devices.
      */
     public void scanAndConnectUsbSerial(final ConnectionCallback callback) {
         if (usbConnected.get()) {
@@ -277,6 +285,116 @@ public class ExternalHardwareManager {
     }
 
     /**
+     * Connect to the GhostH Desktop Suite over local Wi-Fi (default port 8889).
+     */
+    public void connectDesktopApp(@NonNull final String host, final int port, final ConnectionCallback callback) {
+        if (desktopConnected.get()) {
+            disconnectDesktopApp();
+            if (callback != null) callback.onResult(false, "Disconnected from Desktop App");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                desktopSocket = new Socket();
+                desktopSocket.connect(new InetSocketAddress(host, port), 5000);
+                desktopWriter = new PrintWriter(desktopSocket.getOutputStream(), true);
+                desktopConnected.set(true);
+
+                // Send handshake
+                desktopWriter.println("GHOSTH_HANDSHAKE,ANDROID_APP,VERSION=2.2");
+
+                if (callback != null) callback.onResult(true, "Connected to Desktop App at " + host + ":" + port);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(desktopSocket.getInputStream()));
+                String line;
+                while (desktopConnected.get() && (line = reader.readLine()) != null) {
+                    processPacketLine(line);
+                }
+            } catch (Exception ex) {
+                Logging.error("Desktop App connection error: " + ex, ex);
+                disconnectDesktopApp();
+                if (callback != null) callback.onResult(false, "Desktop connection error: " + ex.getMessage());
+            }
+        });
+    }
+
+    public void disconnectDesktopApp() {
+        desktopConnected.set(false);
+        try {
+            if (desktopWriter != null) {
+                desktopWriter.close();
+                desktopWriter = null;
+            }
+            if (desktopSocket != null) {
+                desktopSocket.close();
+                desktopSocket = null;
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Sync cached observations from Android App to Desktop Suite.
+     */
+    public void syncObservationsToDesktop(final ConnectionCallback callback) {
+        if (!desktopConnected.get() || desktopWriter == null) {
+            if (callback != null) callback.onResult(false, "Desktop App not connected");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                int count = 0;
+                if (MainActivity.getNetworkCache() != null) {
+                    for (Network net : MainActivity.getNetworkCache().values()) {
+                        String bssid = net.getBssid();
+                        String ssid = net.getSsid();
+                        int freq = net.getFrequency();
+                        String caps = net.getCapabilities();
+                        int level = net.getLevel();
+                        double lat = 0.0;
+                        double lon = 0.0;
+                        if (net.getLatLng() != null) {
+                            lat = net.getLatLng().latitude;
+                            lon = net.getLatLng().longitude;
+                        }
+                        String syncLine = String.format(Locale.US, "SYNC_NET,%s,%s,%d,%s,%d,%.6f,%.6f",
+                                bssid, ssid, freq, caps, level, lat, lon);
+                        desktopWriter.println(syncLine);
+                        count++;
+                    }
+                }
+                desktopWriter.println("SYNC_COMPLETE," + count);
+                if (callback != null) callback.onResult(true, "Synced " + count + " networks to Desktop Suite");
+            } catch (Exception ex) {
+                Logging.error("Error syncing observations to desktop: " + ex, ex);
+                if (callback != null) callback.onResult(false, "Sync error: " + ex.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Trigger Desktop App to upload all observations directly to WiGLE API.
+     */
+    public void triggerDesktopWigleUpload(final ConnectionCallback callback) {
+        if (!desktopConnected.get() || desktopWriter == null) {
+            if (callback != null) callback.onResult(false, "Desktop App not connected");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                desktopWriter.println("CMD,UPLOAD_WIGLE");
+                if (callback != null) callback.onResult(true, "WiGLE upload command transmitted to Desktop App");
+            } catch (Exception ex) {
+                Logging.error("Error triggering WiGLE upload on desktop: " + ex, ex);
+                if (callback != null) callback.onResult(false, "Upload command error: " + ex.getMessage());
+            }
+        });
+    }
+
+    /**
      * Connect to an ESP32 Promiscuous Sniffer companion via Bluetooth Serial (SPP).
      */
     @SuppressLint("MissingPermission")
@@ -323,7 +441,6 @@ public class ExternalHardwareManager {
 
                 if (callback != null) callback.onResult(true, "Connected to " + target.getName());
 
-                // Read packet stream in background
                 BufferedReader reader = new BufferedReader(new InputStreamReader(btSocket.getInputStream()));
                 String line;
                 while (esp32Connected.get() && (line = reader.readLine()) != null) {
@@ -349,9 +466,6 @@ public class ExternalHardwareManager {
         }
     }
 
-    /**
-     * Connect to a Raspberry Pi / Kali monitor-mode stream or Kismet/Airodump live endpoint over TCP.
-     */
     public void connectPiKali(@NonNull final String host, final int port, final ConnectionCallback callback) {
         if (piConnected.get()) {
             disconnectPiKali();
@@ -391,9 +505,6 @@ public class ExternalHardwareManager {
         }
     }
 
-    /**
-     * Connect to an RTL-SDR receiver stream (rtl_tcp).
-     */
     public void connectSdr(@NonNull final String host, final int port, final ConnectionCallback callback) {
         if (sdrConnected.get()) {
             disconnectSdr();
@@ -426,12 +537,7 @@ public class ExternalHardwareManager {
         }
     }
 
-    /**
-     * Parses frame telemetry from external hardware:
-     * GHOSTH,<TYPE>,<BSSID>,<RSSI>,<CHANNEL>,<SSID>
-     */
     public void processPacketLine(@NonNull final String line) {
-        // Broadcast to UI telemetry listeners
         for (TelemetryListener listener : telemetryListeners) {
             try {
                 listener.onTelemetryLine(line);
@@ -452,10 +558,8 @@ public class ExternalHardwareManager {
 
                 packetsReceived.incrementAndGet();
 
-                // Compute frequency from channel
                 int freq = channel <= 14 ? 2407 + (channel * 5) : 5000 + (channel * 5);
 
-                // Ingest into network cache
                 if (MainActivity.getNetworkCache() != null) {
                     Network net = MainActivity.getNetworkCache().get(bssid);
                     if (net == null) {
@@ -470,7 +574,6 @@ public class ExternalHardwareManager {
                         }
                         MainActivity.getNetworkCache().put(bssid, net);
 
-                        // Save to Database
                         DatabaseHelper db = ListFragment.lameStatic.dbHelper;
                         if (db != null) {
                             db.addObservation(net, ListFragment.lameStatic.location, true);

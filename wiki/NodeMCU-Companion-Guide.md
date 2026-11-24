@@ -196,3 +196,4 @@ GHOSTH,HEARTBEAT,00:00:00:00:00:00,0,1,GhostH_Companion_Alive
 ```
 
 No network payloads are captured or decrypted, ensuring 100% passive, metadata-only operation.
+

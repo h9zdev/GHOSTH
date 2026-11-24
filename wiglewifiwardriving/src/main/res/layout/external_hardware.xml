@@ -376,6 +376,122 @@
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
         </LinearLayout>
 
+        <!-- GhostH Desktop Suite Sync Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_device_car"
+                    android:contentDescription="Desktop" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="8dp"
+                    android:text="GHOSTH DESKTOP SUITE (PC / LINUX)"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/desktop_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DISCONNECTED"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bidirectional sync with Windows/Linux Desktop App. Stream NodeMCU data, sync observations, and trigger WiGLE API uploads."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingTop="6dp">
+
+                <EditText
+                    android:id="@+id/edit_desktop_host"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2"
+                    android:hint="Desktop IP (e.g. 192.168.1.50)"
+                    android:textColor="@color/cyber_cyan"
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textSize="12sp"
+                    android:background="@drawable/cyber_minimal_bg"
+                    android:padding="8dp" />
+
+                <View
+                    android:layout_width="6dp"
+                    android:layout_height="1dp" />
+
+                <EditText
+                    android:id="@+id/edit_desktop_port"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="Port (8889)"
+                    android:inputType="number"
+                    android:textColor="@color/cyber_cyan"
+                    android:textColorHint="@color/cyber_dim_cyan"
+                    android:textSize="12sp"
+                    android:background="@drawable/cyber_minimal_bg"
+                    android:padding="8dp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_connect_desktop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="CONNECT TO DESKTOP SUITE"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/btn_sync_desktop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="SYNC OBSERVATIONS TO DESKTOP"
+                android:textColor="@color/cyber_yellow"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <Button
+                android:id="@+id/btn_upload_wigle_desktop"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="TRIGGER DESKTOP WIGLE API UPLOAD"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+
         <!-- Hardware Telemetry Log -->
         <TextView
             android:layout_width="wrap_content"

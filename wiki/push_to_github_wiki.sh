@@ -23,3 +23,4 @@ git remote add origin "https://${TOKEN}@github.com/h9zdev/GHOSTH.wiki.git"
 git push -u origin master --force
 
 echo "[✓] SUCCESS: GitHub Wiki at https://github.com/h9zdev/GHOSTH/wiki has been fully updated!"
+

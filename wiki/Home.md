@@ -22,3 +22,4 @@ Welcome to the official documentation for the GhostH wardriving suite and compan
 - **GPIO 4 (`D2`)**: LM393 Optical IR Detector Input
 - **GPIO 5 (`D1`)**: Buzzer Alert Output
 - **A0**: Raw IR Amplitude Input
+
