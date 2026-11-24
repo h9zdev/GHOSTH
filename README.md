@@ -2,311 +2,333 @@
 
 [![Android](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026%2B)-brightgreen.svg)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple.svg)](https://kotlinlang.org)
-[![Compose](https://img.shields.io/badge/UI-Jetpack%20Compose%20M3-blue.svg)](https://developer.android.com/jetpack/compose)
-[![Room](https://img.shields.io/badge/Database-Room%202.6.1%20%2B%20SQLite-orange.svg)](https://developer.android.com/training/data-storage/room)
-[![Passive](https://img.shields.io/badge/Mode-100%25%20Passive%20%2F%20Metadata%20Only-cyan.svg)](#passive-operational-principles)
+[![Desktop](https://img.shields.io/badge/Desktop-Linux%20%7C%20Windows-blue.svg)](https://github.com/h9zdev/GHOSTH/releases)
+[![Firmware](https://img.shields.io/badge/Firmware-ESP8266%20NodeMCU%20v2.2-orange.svg)](firmware/nodemcu_ghosth/)
+[![Passive](https://img.shields.io/badge/Mode-100%25%20Passive%20%2F%20Metadata%20Only-cyan.svg)](#-passive-operational-principles--disclaimer)
+[![Releases](https://img.shields.io/badge/Release-v2.0.0-green.svg)](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0)
 
-**GhostH (droid.wardriver.hx.os)** is an advanced, tactical Android wardriving, RF signal intelligence, and wireless spatial analytics platform. Built on top of the battle-tested WiGLE Android core, GhostH elevates RF reconnaissance with a sleek **Cyberpunk HUD interface**, a full-featured **Passive Machine Learning & Analytics Engine**, **OpenStreetMap (FOSS) offline vector mapping**, and an **External Hardware Subsystem** for detecting Flock Safety ALPR infrared strobes and ESP32/NodeMCU sensor streams.
+**GhostH (droid.wardriver.hx.os)** is an advanced, tactical Android wardriving, RF signal intelligence, and wireless spatial analytics platform. Built upon the battle-tested WiGLE Android core, GhostH elevates RF reconnaissance with a sleek **Cyberpunk HUD interface**, a full-featured **Passive Machine Learning & Spatial Analytics Engine**, **OpenStreetMap (FOSS) offline vector mapping**, an **External NodeMCU Companion Subsystem** for multi-channel RF harvesting and optical infrared strobe detection (Flock ALPR), and a cross-platform **Desktop Suite** for Windows and Linux.
 
 ---
 
 ## 📑 Table of Contents
-- [Key Features](#-key-features)
-- [Architecture & Tech Stack](#-architecture--tech-stack)
-- [Wireless Intelligence & Analytics](#-wireless-intelligence--analytics)
-  - [1. Wireless Density Prediction](#1-wireless-density-prediction)
-  - [2. Anomaly Detection Engine](#2-anomaly-detection-engine)
-  - [3. Signal Intelligence](#3-signal-intelligence)
-  - [4. Main Intelligence Dashboard](#4-main-intelligence-dashboard)
-  - [5. Shared Processing Pipeline](#5-shared-processing-pipeline)
-- [Flock ALPR & NodeMCU Hardware Subsystem](#-flock-alpr--nodemcu-hardware-subsystem)
-- [Tactical Cyberpunk HUD UI](#-tactical-cyberpunk-hud-ui)
-- [Project Structure](#-project-structure)
-- [Building & Installation](#-building--installation)
+- [Quick Links & Downloads](#-quick-links--downloads)
+- [System Architecture](#-system-architecture)
+- [Android App Installation & Setup](#-android-app-installation--setup)
+  - [Prerequisites](#prerequisites)
+  - [Option A: Install Pre-built APK](#option-a-install-pre-built-apk)
+  - [Option B: Build APK from Source](#option-b-build-apk-from-source)
+  - [Initial Android App Permissions & Settings](#initial-android-app-permissions--settings)
+  - [WiGLE API Credentials Configuration](#wigle-api-credentials-configuration)
+- [NodeMCU Companion Firmware (ESP8266) Setup](#-nodemcu-companion-firmware-esp8266-setup)
+  - [Hardware Requirements](#hardware-requirements)
+  - [USB Drivers (Linux & Windows)](#usb-drivers-linux--windows)
+  - [Option A: Fast Flash via esptool (Binary)](#option-a-fast-flash-via-esptool-binary)
+  - [Option B: Build and Flash from Source](#option-b-build-and-flash-from-source)
+  - [SoftAP & HayOS Tactical Web Portal](#softap--hayos-tactical-web-portal)
+  - [Connecting NodeMCU to the Android App](#connecting-nodemcu-to-the-android-app)
+- [Desktop Suite (Windows & Linux) Setup](#-desktop-suite-windows--linux-setup)
+  - [Key Capabilities](#key-capabilities)
+  - [Running on Linux](#running-on-linux)
+  - [Running on Windows](#running-on-windows)
+  - [Running from Source Code](#running-from-source-code)
+  - [Two-Way Mobile Sync (App to PC)](#two-way-mobile-sync-app-to-pc)
+  - [Desktop Direct WiGLE Uploader](#desktop-direct-wigle-uploader)
+- [Wireless Intelligence & ML Analytics Engine](#-wireless-intelligence--ml-analytics-engine)
+- [Troubleshooting & FAQ](#-troubleshooting--faq)
 - [Passive Operational Principles & Disclaimer](#-passive-operational-principles--disclaimer)
 - [Attributions & License](#-attributions--license)
 
 ---
 
-## ⚡ Key Features
+## 🔗 Quick Links & Downloads
 
-* **100% Passive & Metadata-Only**: Zero packet payload capture, zero network association, and zero frame injection. Fully compliant with passive RF listening standards.
-* **Cyberpunk Tactical HUD**:
-  * High-contrast dark palette (`#05070E` background, `#00FFF2` Cyber Cyan, `#FF1F8F` Threat Pink).
-  * Real-time **Cyber Radar View** with azimuth orientation, distance range rings, and RF sweeping indicators.
-  * Device-type classification icons (Vehicles, Cameras, Smart TVs, Phones, Headsets, IoT sensors).
-* **FOSS OpenStreetMap Integration**:
-  * Seamless offline vector and raster mapping via MapLibre / OpenStreetMap (no proprietary Google Maps API required).
-  * Instant map provider switching between Google Maps and OpenStreetMap.
-* **On-Device Machine Learning & Intelligence Suite**:
-  * 7 dedicated passive analyzers behind a unified architecture.
-  * Spatial density grid binning with Inverse Distance Weighting (IDW) and on-device TinyML polynomial forecasting.
-  * Exponentially Weighted Moving Average (EWMA) and Z-score anomaly tracking.
-  * Tri-band spectrum utilization analysis ($2.4\,\text{GHz}$, $5\,\text{GHz}$, and $6\,\text{GHz}$ Wi-Fi 6E/7).
-* **External Hardware & ALPR Detection**:
-  * Direct USB-OTG Serial (`115200` baud) and Bluetooth SPP/BLE telemetry parser.
-  * Real-time detection of **Flock Safety ALPR pulsed infrared (850nm / 940nm) illuminators** via NodeMCU / ESP8266 optical sensor modules.
-* **OSINT Intelligence**:
-  * Automated OUI MAC hardware vendor lookup.
-  * Random / Private MAC rotation detection.
-  * Geospatial cluster centroid trilateration.
-* **Reporting & Export**:
-  * Multi-format export: **PDF Threat & Density Reports**, **CSV Analytics Datasets**, **KML**, and **GPX Route Tracks**.
+* 📦 **[Latest Releases & Binary Downloads (v2.0.0)](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0)**
+  * `GhostH-Wardrive.apk` — Android application package
+  * `nodemcu_ghosth_firmware.bin` — Compiled NodeMCU companion firmware
+  * `nodemcu_ghosth_source.zip` — NodeMCU Arduino source package
+  * `GhostH-Desktop-Linux.tar.gz` — Standalone executable for Linux (x86_64)
+  * `GhostH-Desktop-Windows.zip` — Standalone executable for Windows (x64)
+  * `GhostH-Desktop-Source.zip` — Python source code for the desktop suite
+* 📖 **[GhostH Official GitHub Wiki](https://github.com/h9zdev/GHOSTH/wiki)**
+* 🌐 **[Developer Website](https://haybnz.web.app/)**
 
 ---
 
-## 🛠 Architecture & Tech Stack
-
-```mermaid
-graph TD
-    subgraph Sensors["Hardware & RF Ingestion"]
-        WIFI["Internal Wi-Fi Scanner (2.4/5/6 GHz)"]
-        BLE["Bluetooth LE Scanner"]
-        CELL["Cellular Tower RSRP / MCC-MNC"]
-        GPS["GNSS / Location Provider (NMEA)"]
-        EXT_HW["NodeMCU / ESP32 External Sensor\n(Flock IR Pulse / BLE)"]
-    end
-
-    subgraph DataPipeline["Data Layer & Persistence"]
-        DB_HELPER["DatabaseHelper (SQLite)\n• wiglewifi.sqlite\n• network & location tables"]
-        ROOM_DB["IntelligenceDatabase (Room 2.6.1)\n• intelligence.db\n• findings table"]
-        PIPELINE["ObservationPipeline.kt\n• Validation & Normalization\n• Data Quality Classification\n• Spatial Grid Binning (~55m)"]
-    end
-
-    subgraph AnalyticsEngine["Passive Intelligence Engine"]
-        DEN["WirelessDensityAnalyzer (IDW & TinyML)"]
-        ANOM["AnomalyDetectionAnalyzer (EWMA & Z-Score)"]
-        SIG["SignalIntelligenceAnalyzer (Tri-Band & Channels)"]
-        TEMP["TemporalIntelligenceAnalyzer (Epoch Drift)"]
-        CLUST["MlClusteringAnalyzer (Taxonomy)"]
-        GEO["GeospatialMlAnalyzer (DBSCAN & Mobile APs)"]
-        PRED["PredictiveAnalyticsAnalyzer (Velocity)"]
-    end
-
-    subgraph Presentation["User Interface (Jetpack Compose & HUD)"]
-        MAIN["MainActivity (Drawer, Radar, List, Maps)"]
-        INTEL_HUB["IntelligenceActivity (6-Section Central Dashboard)"]
-        SUB_ACT["Module Activities (Direct Intent Navigation)"]
-        RADAR["CyberRadarView (Custom SurfaceView Canvas)"]
-    end
-
-    WIFI --> DB_HELPER
-    BLE --> DB_HELPER
-    CELL --> DB_HELPER
-    GPS --> DB_HELPER
-    EXT_HW --> DB_HELPER
-
-    DB_HELPER --> PIPELINE
-    PIPELINE --> AnalyticsEngine
-    AnalyticsEngine --> ROOM_DB
-    ROOM_DB --> INTEL_HUB
-    ROOM_DB --> SUB_ACT
-    DB_HELPER --> MAIN
-    EXT_HW --> MAIN
-```
-
----
-
-## 🧠 Wireless Intelligence & Analytics
-
-The **Intelligence** sub-system is a native Jetpack Compose architecture operating completely off the main scan thread (`Dispatchers.IO` coroutines). All metrics are derived from actual SQLite records (`wiglewifi.sqlite`) and live memory caches.
-
-### 1. Wireless Density Prediction
-* **Spatial Grid Binning**: Divides geographic areas into $\sim 55\,\text{m}$ sectors ($\sim 0.003\,\text{km}^2$).
-* **Concentration Calculations**: Computes $\text{APs}/\text{km}^2$ and classifies sectors into `HIGH` ($\ge 12\,\text{APs}$), `MEDIUM` ($5\text{--}11\,\text{APs}$), and `LOW` ($< 5\,\text{APs}$) density zones.
-* **Strict Prediction Separation**: Fringe boundary sectors are estimated using Inverse Distance Weighting (IDW) interpolation and labeled `[MODEL-ESTIMATED COVERAGE]`. **Predictions are never presented as confirmed observations.**
-* **5 Map Visualization Modes**:
-  1. `DENSITY_HEATMAP`: Color-coded heat spots (Cyan $\to$ Yellow $\to$ Threat Pink).
-  2. `OBSERVATION_CLUSTERS`: Circular cluster pins displaying AP counts.
-  3. `NETWORK_DISTRIBUTION`: Individual dot points color-coded by security protocol (Open, WEP, WPA2, WPA3, BLE).
-  4. `SIGNAL_STRENGTH_HEATMAP`: Smooth RSSI signal propagation halos.
-  5. `COVERAGE_LAYER`: **Confirmed Observed Coverage** (solid cyan blocks) vs **Model-Estimated Coverage** (magenta blocks with dashed borders).
-
-### 2. Anomaly Detection Engine
-* **Observation Anomalies**:
-  * Duplicate records (exact BSSID, timestamp, and coordinates flagged without deleting evidence).
-  * Inconsistent metadata (channel mismatches against RF frequency, contradictory WPA capabilities).
-  * Invalid coordinates (`0.0, 0.0` or out-of-range GPS points).
-  * Inconsistent timestamps (future timestamps or pre-2005 epochs).
-* **Signal Anomalies**:
-  * Exponentially Weighted Moving Average (EWMA) tracking with variance baselines.
-  * Z-score divergence ($> 2.5\sigma$) and sudden RSSI shifts ($> 20\,\text{dBm}$).
-  * Abrupt cross-band jumping ($2.4\,\text{GHz} \to 5\,\text{GHz}/6\,\text{GHz}$ on single MAC address).
-* **Operational Rule**: *An unusual observation is not proof of an attack.* Every flagged anomaly includes an Anomaly ID (`ANOM-...`), timestamp, observation reference, category, objective explanation, confidence score, and recommended data-quality action.
-
-### 3. Signal Intelligence
-* **RSSI Distribution**: Real-time histogram from $-100\,\text{dBm}$ to $-30\,\text{dBm}$ with standard quality classifications (Excellent, Good, Fair, Poor).
-* **Tri-Band Spectrum Analytics**: Real-time distribution across $2.4\,\text{GHz}$, $5\,\text{GHz}$, and $6\,\text{GHz}$ (Wi-Fi 6E/7).
-* **Channel Concentration**: Channel count distribution across channels 1–14, 36–165, and 1–93.
-* **RF Disclaimer**: Displays explicit notice: *"Observed AP counts represent passive beacon observations; true RF spectral utilization requires active spectrum analysis."*
-
-### 4. Main Intelligence Dashboard
-Accessible from the main menu drawer or directly via Intent (`net.wigle.wigleandroid.intelligence.ui.IntelligenceActivity`):
-1. **Wireless Overview**: Top KPI cards (Total Observations, Unique APs, Anomalies, Sectors, Observed Coverage, Average Density), interactive map viewport, and direct module launchers.
-2. **Density Intelligence**: Multi-mode map, analysis radius selector ($50\,\text{m}, 100\,\text{m}, 250\,\text{m}, 500\,\text{m}, 1000\,\text{m}$), and confirmed vs estimated coverage statistics.
-3. **Anomaly Detection**: Category filters, severity breakdown, and comprehensive audit card list.
-4. **Signal Intelligence**: RSSI histogram chart, tri-band spectrum breakdown, and channel concentration chart.
-5. **Historical Analytics**: Timeline comparison ($1\text{h}, 24\text{h}, 7\text{d}, \text{All}$), observation velocity, and temporal findings.
-6. **Data Quality**: Breakdown of records by quality status (`Normal`, `Inconsistent`, `Duplicate`, `Incomplete`, `Requires Review`).
-
-### 5. Shared Processing Pipeline
-Implemented in `ObservationPipeline.kt`, running a 9-step workflow:
-1. Database Retrieval $\to$ 2. Coordinate & Signal Validation $\to$ 3. Normalization $\to$ 4. Handling Missing Fields $\to$ 5. Duplication Flagging $\to$ 6. Data Quality Assignment $\to$ 7. Feature Generation $\to$ 8. Multi-Analyzer Execution $\to$ 9. Room Persistence & Reactive StateFlow UI emission.
-
----
-
-## 📷 Flock ALPR & NodeMCU Hardware Subsystem
-
-> [!TIP]
-> For the complete step-by-step hardware wiring, flashing, and troubleshooting guide, see the **[NodeMCU Setup & Troubleshooting Wiki](wiki/NodeMCU-Companion-Guide.md)**.
-
-Flock Safety ALPR (Automatic License Plate Recognition) cameras use **high-power 850nm / 940nm pulsed infrared LED strobes** flashing at camera shutter sync frequencies ($30\text{--}60\,\text{Hz}$) to capture license plates in all lighting conditions.
-
-```mermaid
-sequenceDiagram
-    participant Camera as Flock ALPR Camera
-    participant Sensor as BPW34 IR Photodiode
-    participant MCU as NodeMCU (ESP8266)
-    participant Phone as Android Phone (GhostH)
-
-    Camera->>Sensor: Pulsed 850nm/940nm Strobe (30-60 Hz)
-    Sensor->>MCU: Hardware Interrupt on D2 (GPIO 4)
-    MCU->>MCU: Frequency Discriminator (Pulse Timing)
-    MCU->>Phone: USB-OTG Serial: "$ALPR_STRIKE,TYPE=PULSED_IR,FREQ=30.2,PULSES=14*FF"
-    Phone->>Phone: Geotag Event + Audio/Visual HUD Alert
-```
-
-### Wiring Diagram (NodeMCU to IR Sensor)
-
-| Sensor Pin (LM393 + BPW34) | NodeMCU (ESP8266) Pin | ESP32 Pin | Purpose |
-| :--- | :--- | :--- | :--- |
-| **VCC** | `3V3` (or `VIN` if 5V module) | `3V3` / `5V` | Power supply |
-| **GND** | `GND` | `GND` | Ground |
-| **D0 (Digital Output)** | `D2` (GPIO 4) | `GPIO 4` | Hardware interrupt for pulse timing |
-| **A0 (Analog Output)** | `A0` (ADC0) | `GPIO 34` | Raw optical irradiance level |
-| **Buzzer / LED (+)** | `D1` (GPIO 5) | `GPIO 2` | Local audible/visual alarm |
-
-### Firmware Logic
-The NodeMCU firmware uses an `IRAM_ATTR` interrupt on `D2` to measure pulse intervals. When it detects at least 10 valid pulses within a 400 ms window matching the $25\text{--}65\,\text{Hz}$ ALPR strobe window, it outputs:
-```text
-$ALPR_STRIKE,TYPE=PULSED_IR,FREQ=30.2,PULSES=14,IR_RAW=810*FF
-```
-The Android app reads this stream over USB-OTG serial, associates it with the current GPS coordinates, stores it in `intelligence.db`, and alerts the user on the radar map.
-
----
-
-## 🎨 Tactical Cyberpunk HUD UI
-
-* **Palette**:
-  * **Background**: Pure Cyber Black (`#05070E`) / Panel Surface (`#0D111A`)
-  * **Primary Accent**: Cyber Cyan (`#00FFF2`)
-  * **Threat / Alert Accent**: Cyber Pink (`#FF1F8F`)
-  * **Signal / Safe Accent**: Cyber Green (`#00FF88`)
-  * **Warning Accent**: Cyber Yellow (`#FFE500`)
-* **Radar Sweep**: `CyberRadarView` implements hardware-accelerated canvas rendering with azimuth compass heading, range rings ($25\,\text{m}, 50\,\text{m}, 100\,\text{m}$), and signal intensity dots.
-* **Minimalist Design**: Removed unnecessary borders and gradient bars; uses clean flat cards and high-legibility typography (`JetBrains Mono` / system monospace).
-
----
-
-## 📁 Project Structure
+## 🏗 System Architecture
 
 ```text
-wiglewifiwardriving/src/main/
-├── AndroidManifest.xml
-├── java/net/wigle/wigleandroid/
-│   ├── MainActivity.java                   # Primary navigation drawer & wardrive lifecycle
-│   ├── FossNetworkActivity.java            # FOSS OpenStreetMap vector map viewer
-│   ├── ExternalHardwareFragment.java       # USB-OTG serial & BLE hardware manager
-│   ├── db/
-│   │   └── DatabaseHelper.java             # Core SQLite database worker (wiglewifi.sqlite)
-│   ├── ui/
-│   │   ├── CyberRadarView.java             # Cyberpunk animated radar canvas
-│   │   └── SetNetworkListAdapter.java      # Hardware device-type icon adapter
-│   ├── intelligence/
-│   │   ├── analyzer/                       # 7 Modular Intelligence Analyzers
-│   │   │   ├── Analyzer.kt                 # Common passive interface
-│   │   │   ├── WirelessDensityAnalyzer.kt  # Spatial binning & IDW fringe interpolation
-│   │   │   ├── TinyMlDensityPredictor.kt   # On-device polynomial prediction model
-│   │   │   ├── AnomalyDetectionAnalyzer.kt # EWMA baseline & Z-score anomaly detector
-│   │   │   ├── SignalIntelligenceAnalyzer.kt # Tri-band spectrum & channel congestion
-│   │   │   ├── TemporalIntelligenceAnalyzer.kt # Network emergence & drift tracking
-│   │   │   ├── MlClusteringAnalyzer.kt     # Environmental fingerprint classification
-│   │   │   ├── GeospatialMlAnalyzer.kt     # DBSCAN clustering & mobile AP detection
-│   │   │   └── PredictiveAnalyticsAnalyzer.kt # Trend velocity & trajectory modeling
-│   │   ├── model/                          # Domain models (Observation, Finding, Severity)
-│   │   ├── persistence/                    # Room Database (FindingDao, FindingEntity, intelligence.db)
-│   │   ├── service/                        # ObservationPipeline.kt & IntelligenceEngine.kt
-│   │   ├── export/                         # ReportExporter.kt (PDF & CSV export engine)
-│   │   ├── replay/                         # ObservationReplayer.kt (Session simulation)
-│   │   └── ui/                             # Jetpack Compose UI
-│   │       ├── IntelligenceActivity.kt     # 6-Section Main Dashboard
-│   │       ├── ModuleActivities.kt         # Dedicated sub-activities for each module
-│   │       ├── IntelligenceViewModel.kt    # Reactive StateFlow view model
-│   │       ├── IntelligenceTheme.kt        # Dark HUD styling & cyberpunk color palette
-│   │       └── components/                 # SharedMapLayer, ModuleDetailScreen, FindingsList
-│   └── osint/                              # Wireless & Geospatial OSINT Services & UI
+┌────────────────────────────────────────────────────────┐
+│               ESP8266 NodeMCU Companion                │
+│  - Continuous 2.4 GHz RF Ingest (Channels 1 - 13)      │
+│  - Optical IR Strobe Discriminator (Flock ALPR 25-65Hz) │
+│  - SoftAP: "GhostH" (192.168.4.1) / TCP Port 8888      │
+│  - Web Portal: HayOS Dark Tactical UI                  │
+└───────────────┬────────────────────────┬───────────────┘
+                │ USB Serial             │ Wi-Fi Stream
+                │ (115200 baud)          │ (TCP :8888)
+                ▼                        ▼
+┌───────────────────────────────┐  ┌───────────────────────────────┐
+│       GhostH Android App      │  │     GhostH Desktop Suite      │
+│     (droid.wardriver.hx.os)   │  │       (Windows / Linux)       │
+│  - Passive ML Analytics (7)   │  │  - USB Serial & Wi-Fi Ingest  │
+│  - FOSS OpenStreetMap Vector  │  │  - LAN Network Sync (:8889)   │
+│  - Cyberpunk Radar HUD Canvas │  │  - Direct WiGLE API Uploader  │
+│  - WiGLE CSV Exporter         │  │  - WiGLE CSV Exporter (v1.4)  │
+└───────────────┬───────────────┘  └───────────────┬───────────────┘
+                │                                  │
+                │     Local LAN Sync (Port 8889)   │
+                └──────────────────────────────────┘
+                                │
+                                ▼
+                ┌───────────────────────────────┐
+                │          WiGLE.net            │
+                │  (Excludes "GHOSTH" SSID)     │
+                └───────────────────────────────┘
 ```
 
 ---
 
-## 🚀 Building & Installation
+## 📱 Android App Installation & Setup
 
 ### Prerequisites
-* **Android Studio** Ladybug / Hedgehog or newer.
-* **JDK 17** or **JDK 21**.
-* **Android SDK**: `compileSdk 35`, `minSdk 26`, `targetSdk 35`.
-* **ADB** installed and USB debugging enabled on your target device.
+* Android device running **Android 8.0 (Oreo / API 26) or higher** (tested up to Android 14/15).
+* GPS / Location hardware with high-accuracy mode enabled.
+* Wi-Fi and Bluetooth / BLE hardware enabled.
 
-### 1. Clone the Repository
-```bash
-git clone https://github.com/h9zdev/GHOSTH.git
-cd GHOSTH
-```
+### Option A: Install Pre-built APK
+1. Download `GhostH-Wardrive.apk` from [GitHub Releases](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0).
+2. Transfer the file to your phone, or download directly in your mobile browser.
+3. Open your file manager, tap `GhostH-Wardrive.apk`, and select **Install**. (If prompted, allow installation from unknown sources).
+4. **Via ADB (Command Line)**:
+   ```bash
+   adb install -r GhostH-Wardrive.apk
+   ```
 
-### 2. Run the Unit Test Suite
-To verify all intelligence analyzers, OSINT services, and data pipelines:
-```bash
-./gradlew testDebugUnitTest --tests "net.wigle.wigleandroid.intelligence.*" --tests "net.wigle.wigleandroid.osint.*"
-```
+### Option B: Build APK from Source
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/h9zdev/GHOSTH.git
+   cd GHOSTH
+   ```
+2. Build the debug APK using Gradle:
+   ```bash
+   ./gradlew assembleDebug
+   ```
+3. Install onto your connected Android device:
+   ```bash
+   adb install -r wiglewifiwardriving/build/outputs/apk/debug/wiglewifiwardriving-debug.apk
+   ```
+4. Launch the application:
+   ```bash
+   adb shell am start -n droid.wardriver.hx.os/net.wigle.wigleandroid.MainActivity
+   ```
 
-### 3. Assemble the Debug APK
-```bash
-./gradlew assembleDebug
-```
-The compiled APK will be located at:
-```text
-wiglewifiwardriving/build/outputs/apk/debug/wiglewifiwardriving-debug.apk
-```
+### Initial Android App Permissions & Settings
+1. **Location Permission**: Grant **"Allow all the time"** (Precise Location). Background location is required so wardriving scans continue when your screen is locked.
+2. **Nearby Devices / Bluetooth**: Allow access to scan for BLE beacons and companion sensors.
+3. **Battery Optimization**: In Android Settings $\rightarrow$ Apps $\rightarrow$ GhostH $\rightarrow$ Battery, select **"Unrestricted"** to prevent Android from sleeping the scanning background service.
+4. **Wi-Fi Scan Throttling (Developer Options)**:
+   * Go to Android Settings $\rightarrow$ System $\rightarrow$ Developer options.
+   * Under Networking, toggle **Wi-Fi scan throttling** to **OFF** for real-time 4-second scan intervals instead of Android's throttled 30-minute intervals.
 
-### 4. Install onto Connected Device
-```bash
-adb install -r wiglewifiwardriving/build/outputs/apk/debug/wiglewifiwardriving-debug.apk
-```
+### WiGLE API Credentials Configuration
+1. Register an account at [WiGLE.net](https://wigle.net) and navigate to **Account $\rightarrow$ API**.
+2. Click **Generate API Token** to receive your **API Name** (e.g., `AID...`) and **API Token** (e.g., `32-character secret`).
+3. In GhostH on your phone:
+   * Open the left navigation drawer and tap **Settings**.
+   * Under **WiGLE Account / API**, enter your **API Name** and **API Token**.
+   * Tap **Validate Credentials** to test connectivity.
+4. *Privacy Guard*: GhostH automatically excludes any network with an SSID containing `GHOSTH` (case-insensitive) from WiGLE CSV generation and API uploads, preventing your companion hardware from leaking to public databases.
 
-### 5. Launch the Intelligence Dashboard Directly via ADB
-```bash
-adb shell am start -n droid.wardriver.hx.os/net.wigle.wigleandroid.intelligence.ui.IntelligenceActivity
-```
+---
+
+## 📡 NodeMCU Companion Firmware (ESP8266) Setup
+
+The NodeMCU companion node augments your Android device with continuous, hardware-accelerated 2.4 GHz channel hopping and optional optical infrared strobe detection for automated Flock Safety ALPR identification.
+
+### Hardware Requirements
+* **NodeMCU Board**: ESP8266 (ESP-12E / ESP-12F module) with micro-USB.
+* **USB-to-UART Chip**: Silicon Labs **CP2102** or WCH **CH340G**.
+* **Micro-USB Data Cable** (ensure cable has data lines, not charge-only).
+* *(Optional)* **Optical IR Sensor**: LM393 IR receiver module connected to **D2 (GPIO4)** for Flock ALPR optical pulse recognition.
+
+### USB Drivers (Linux & Windows)
+* **Linux**:
+  * The Linux kernel includes native drivers for both `cp210x` and `ch341` out of the box.
+  * Ensure your user has access to serial ports by adding yourself to the `dialout` group:
+    ```bash
+    sudo usermod -a -G dialout $USER
+    ```
+  * Log out and log back in, or grant temporary access:
+    ```bash
+    sudo chmod 666 /dev/ttyUSB0
+    ```
+* **Windows**:
+  * CP2102: Download and install the [Silicon Labs CP210x VCP Driver](https://www.silabs.com/developers/usb-to-uart-bridge-vcp-drivers).
+  * CH340: Download and install the [WCH CH341SER Driver](http://www.wch-ic.com/downloads/CH341SER_EXE.html).
+
+### Option A: Fast Flash via esptool (Binary)
+1. Download `nodemcu_ghosth_firmware.bin` from [GitHub Releases](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0).
+2. Install `esptool`:
+   ```bash
+   pip install esptool
+   ```
+3. Connect your NodeMCU via USB and flash:
+   * **Linux**:
+     ```bash
+     python3 -m esptool --chip esp8266 --port /dev/ttyUSB0 --baud 460800 write-flash --flash-mode dio 0x00000 nodemcu_ghosth_firmware.bin
+     ```
+   * **Windows** (check Device Manager for COM port, e.g., `COM3`):
+     ```cmd
+     python -m esptool --chip esp8266 --port COM3 --baud 460800 write-flash --flash-mode dio 0x00000 nodemcu_ghosth_firmware.bin
+     ```
+   * *Alternative Script*: Run `bash firmware/nodemcu_ghosth/flash_nodemcu.sh` from the repository.
+
+### Option B: Build and Flash from Source
+1. Install **Arduino IDE** or **arduino-cli**.
+2. Add ESP8266 board manager URL in Preferences:
+   ```text
+   http://arduino.esp8266.com/stable/package_esp8266com_index.json
+   ```
+3. Install board package `esp8266:esp8266` (version 3.1.2 or newer).
+4. Open `firmware/nodemcu_ghosth/nodemcu_ghosth.ino`.
+5. Select Board: **NodeMCU 1.0 (ESP-12E Module)**, Upload Speed: **460800**, CPU Frequency: **160 MHz**.
+6. Click **Upload** (or use `arduino-cli compile --fqbn esp8266:esp8266:nodemcuv2 ...`).
+
+### SoftAP & HayOS Tactical Web Portal
+Once powered, the NodeMCU broadcasts an access point:
+* **SSID**: `GhostH`
+* **Password**: `ghosth1234`
+* **Static IP**: `192.168.4.1`
+* **Web Portal**: Open `http://192.168.4.1` in your browser.
+  * **Tactical HayOS UI**: Pure black background (`#050505`) and Cyber Cyan styling (`#00FFD1`).
+  * **Live Wi-Fi Table**: Shows live nearby SSIDs, BSSIDs, RSSI signal levels, and channels harvested by the chip, auto-refreshing via `/api/scan`.
+  * **Configuration Card**: Modify AP SSID and passphrase safely stored in EEPROM.
+  * **Developer Links**: Quick access to [haybnz.web.app](https://haybnz.web.app/) and [GitHub Wiki](https://github.com/h9zdev/GHOSTH/wiki).
+
+### Connecting NodeMCU to the Android App
+There are two connection modes:
+1. **USB-OTG Serial Mode**:
+   * Connect the NodeMCU to your Android phone via a USB-OTG adapter.
+   * Open GhostH $\rightarrow$ drawer $\rightarrow$ **External Hardware**.
+   * Set baud rate to `115200` and tap **Connect USB-OTG**. Telemetry packets will stream directly into the radar map and database.
+2. **Wi-Fi Companion Mode**:
+   * On your phone, connect to the Wi-Fi network `GhostH` (password: `ghosth1234`).
+   * In GhostH $\rightarrow$ **External Hardware**, under NodeMCU Network Stream, enter IP `192.168.4.1` and Port `8888`.
+   * Tap **Connect TCP Stream**.
+
+---
+
+## 💻 Desktop Suite (Windows & Linux) Setup
+
+The GhostH Desktop Suite is a standalone graphical workstation that pairs with your Android phone and NodeMCU hardware.
+
+### Key Capabilities
+* **Hardware Ingestion**: Ingests serial telemetry from NodeMCU over USB (auto-detecting baud 115200) or over Wi-Fi socket (`192.168.4.1:8888`).
+* **Two-Way Mobile Sync**: Runs a local TCP sync server on port `8889` that receives observation dumps from your Android device over LAN.
+* **WiGLE API Uploader**: Validates WiGLE API tokens and directly uploads harvested wardriving sessions to WiGLE servers.
+* **WiGLE CSV Export**: Generates compliant WiGLE CSV v1.4 files with automatic filtering of `GHOSTH` SSIDs.
+
+### Running on Linux
+1. Download `GhostH-Desktop-Linux.tar.gz` from [GitHub Releases](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0).
+2. Extract and run:
+   ```bash
+   tar -xzf GhostH-Desktop-Linux.tar.gz
+   cd GhostH-Desktop-Linux
+   chmod +x ghosth_desktop
+   ./ghosth_desktop
+   ```
+
+### Running on Windows
+1. Download `GhostH-Desktop-Windows.zip` from [GitHub Releases](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0).
+2. Extract the archive.
+3. Double-click `GhostH-Desktop.exe` to launch the GUI.
+
+### Running from Source Code
+1. Download `GhostH-Desktop-Source.zip` from [GitHub Releases](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0).
+2. Extract the files and install dependencies:
+   ```bash
+   pip install pyserial requests
+   ```
+3. Run the application:
+   ```bash
+   python3 ghosth_desktop.py
+   ```
+
+### Two-Way Mobile Sync (App to PC)
+1. Ensure your PC and Android phone are on the same local network (or phone is connected to a PC Wi-Fi hotspot).
+2. On your PC, open GhostH Desktop. The bottom status bar shows: `Sync Server: Listening on port 8889 (IP: 192.168.x.x)`.
+3. On your phone:
+   * Open GhostH $\rightarrow$ drawer $\rightarrow$ **External Hardware**.
+   * Scroll to **GHOSTH DESKTOP SUITE (PC / LINUX)**.
+   * Enter your PC's IP address and Port `8889`.
+   * Tap **Connect Desktop App**, then tap **Sync Observations to Desktop**.
+4. All observations cached on the mobile device are transferred to the desktop database.
+
+### Desktop Direct WiGLE Uploader
+1. In GhostH Desktop, enter your **WiGLE API Name** and **API Token** in the right-hand panel.
+2. Click **Test API Credentials**.
+3. Once validated, click **Upload to WiGLE API**. GhostH formats the dataset into WiGLE CSV v1.4, strips internal companion networks, and uploads directly via HTTPS multipart POST.
+
+---
+
+## 🧠 Wireless Intelligence & ML Analytics Engine
+
+GhostH features 7 passive on-device intelligence analyzers accessible from the **Intelligence Dashboard** in the app:
+
+| Analyzer Module | Algorithmic Implementation | Tactical Purpose |
+| :--- | :--- | :--- |
+| **1. Wireless Density Predictor** | 2D Spatial Binning ($0.001^\circ$ grid), Inverse Distance Weighting (IDW), Polynomial Trend Fitting | Forecasts wireless congestion zones and signal coverage holes. |
+| **2. Anomaly Detection Engine** | Rolling Exponentially Weighted Moving Average (EWMA), Dynamic Z-Score Thresholding | Discovers rogue APs, suspicious RSSI spikes, beacon anomalies, and MAC changes. |
+| **3. Signal Intelligence (SIGINT)** | Tri-Band Channel Congestion (2.4 GHz, 5 GHz, 6 GHz Wi-Fi 6E/7), Shannon Entropy, Signal-to-Noise Ratio (SNR) | Evaluates spectral pollution and channel utilization. |
+| **4. Temporal Analytics** | Sliding Observation Windows, Jaccard Similarity Coefficient, First-Seen / Last-Seen Tracking | Detects transient mobile APs versus permanent infrastructure. |
+| **5. Environmental Clustering** | K-Means / Centroid Heuristics across SSID/RSSI/Auth feature vectors | Classifies RF profiles into Enterprise, Commercial, Residential, or IoT environments. |
+| **6. Geospatial Clustering** | Density-Based Spatial Clustering of Applications with Noise (DBSCAN) | Computes spatial centroids and flags high-velocity moving transmitters. |
+| **7. Predictive Analytics** | Multi-Interval Trend Velocity & Linear Regression Trajectory Extrapolation | Estimates real-time network discovery rates and predicts density frontiers. |
+
+---
+
+## 🔧 Troubleshooting & FAQ
+
+### 1. I flashed the NodeMCU, but the `GhostH` Wi-Fi network does not appear.
+* **Firmware v2.2 Update**: Ensure you have flashed firmware v2.2 or newer. Older versions hopped channels without delay, suppressing the SoftAP beacon. Firmware v2.2 includes an automatic 1.8-second dwell on Channel 1.
+* **Power Supply**: Ensure your NodeMCU is plugged into a USB port capable of providing at least $500\,\text{mA}$. Inadequate power causes the ESP8266 radio to brown out.
+* **Serial Verification**: Connect to serial at 115200 baud via terminal or Arduino Serial Monitor. You should see `// GHOSTH NODEMCU COMPANION v2.2 ONLINE`.
+
+### 2. Android shows "Wi-Fi has no internet access" and disconnects from `GhostH`.
+* When connected to `GhostH`, Android detects that there is no WAN internet.
+* In the Android notification shade, tap the Wi-Fi alert and check **"Stay connected"** or **"Yes, keep connection"**.
+* Firmware v2.2 responds to `/generate_204` requests to prevent aggressive captive portal drops.
+
+### 3. Permission denied accessing `/dev/ttyUSB0` on Linux.
+* Run:
+  ```bash
+  sudo usermod -a -G dialout $USER
+  sudo chmod 666 /dev/ttyUSB0
+  ```
+* Unplug and reconnect the USB cable.
+
+### 4. Why is Wi-Fi scanning slow on my Android phone?
+* Android enables **Wi-Fi scan throttling** by default (limiting scans to 4 times every 2 minutes for background apps).
+* Enable Developer Options: Go to Settings $\rightarrow$ About Phone $\rightarrow$ tap **Build Number** 7 times.
+* Go to Settings $\rightarrow$ System $\rightarrow$ Developer options $\rightarrow$ turn **Wi-Fi scan throttling** **OFF**.
+
+### 5. Are my companion hardware packets uploaded to WiGLE?
+* **No**. GhostH strictly filters out any observation where the SSID matches or contains `GHOSTH` (case-insensitive) prior to generating WiGLE CSVs and before dispatching API uploads.
 
 ---
 
 ## 🛡 Passive Operational Principles & Disclaimer
 
-1. **Passive Operation**: GhostH operates in **100% passive monitoring mode**. It does not perform packet injection, does not connect to unauthenticated networks, and does not capture packet payload data.
-2. **Data Privacy**: All analyses are conducted strictly on standard 802.11 beacon metadata, BLE advertisements, and cellular network status broadcast over open airwaves.
-3. **Anomaly Context**: As enforced by the Anomaly Detection engine, *an unusual observation is not proof of an attack or malicious intent*. Common RF phenomena such as multipath interference, vehicular motion, captive portal deployments, and client-side private MAC rotation are objectively categorized.
+1. **Passive Operation**: GhostH operates in **100% passive listening mode**. It does not perform packet injection, does not authenticate with non-consenting networks, and does not capture packet payload data.
+2. **Metadata Compliance**: All telemetry is restricted to standard IEEE 802.11 beacon/probe-response frames, Bluetooth LE advertisements, and optical pulses broadcast across public RF airwaves.
+3. **Authorized Auditing**: This tool is designed strictly for authorized wireless site surveys, network engineering, spatial RF research, and personal network defense.
 
 ---
 
 ## 📜 Attributions & License
 
-This project is built upon the open-source **WiGLE Wi-Fi Wardriving** Android client, maintained by the [WiGLE.net team](https://wigle.net).
-
-### Icon & Audio Attributions
-* **Dashboard Icon**: [syalankush (Figma)](https://www.figma.com/@syalankush)
-* **Eye, Filter, Map, Sort Icons**: [Dazzle UI](https://dazzleui.gumroad.com/l/dazzleiconsfree)
-* **No WiFi Icon**: [d12da0b9_b193_4 (Figma)](https://www.figma.com/@d12da0b9_b193_4)
-* **Share Icon**: [Noah Jacob](https://noahjacob.us/?ref=svgrepo.com)
-* **User Star**: [Remix Design](https://github.com/Remix-Design/remixicon)
-* **Wrench Icon**: [Font Awesome](https://github.com/FortAwesome/Font-Awesome)
-* **Proximity Beep & Blip Audio**: [Balcoran (Freesound)](https://freesound.org/people/Balcoran)
+* Built upon the open-source **WiGLE Wi-Fi Wardriving** Android client, maintained by [WiGLE.net](https://wigle.net).
+* Tactical UI styled with **HayOS** interface architecture by [haybnz.web.app](https://haybnz.web.app/).
+* Licensed under the [BSD 3-Clause License](LICENSE).
