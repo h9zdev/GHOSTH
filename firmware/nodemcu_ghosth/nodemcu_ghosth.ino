@@ -66,6 +66,7 @@ ESP8266WebServer webServer(80);
 
 unsigned long lastTelemetryHeartbeat = 0;
 unsigned long lastScanStart = 0;
+unsigned long lastScanCompleted = 0;
 unsigned long totalPacketsIngested = 0;
 
 void loadConfig() {
@@ -253,9 +254,11 @@ void setup() {
     attachInterrupt(digitalPinToInterrupt(PIN_IR_DIGITAL), onIrPulse, FALLING);
 
     // Explicitly configure and start SoftAP (Channel 1, visible)
-    WiFi.disconnect(true);
+    WiFi.disconnect();
     delay(100);
     WiFi.mode(WIFI_AP_STA);
+    WiFi.setSleepMode(WIFI_NONE_SLEEP);
+    WiFi.setOutputPower(20.5);
     IPAddress apIP(192, 168, 4, 1);
     IPAddress netMsk(255, 255, 255, 0);
     WiFi.softAPConfig(apIP, apIP, netMsk);
@@ -267,6 +270,10 @@ void setup() {
     webServer.on("/", HTTP_GET, handleWebRoot);
     webServer.on("/save", HTTP_POST, handleWebSave);
     webServer.on("/api/scan", HTTP_GET, handleApiScan);
+    webServer.on("/generate_204", []() { webServer.send(204, "text/plain", ""); });
+    webServer.on("/gen_204", []() { webServer.send(204, "text/plain", ""); });
+    webServer.on("/hotspot-detect.html", handleWebRoot);
+    webServer.onNotFound(handleWebRoot);
     webServer.begin();
 
     tcpServer.begin();
@@ -333,9 +340,16 @@ void loop() {
             yield();
         }
         WiFi.scanDelete();
-        WiFi.scanNetworks(true, true);
-        lastScanStart = now;
-    } else if (scanResult == -2 && (now - lastScanStart > 6000)) {
+        lastScanCompleted = now;
+    } else if (scanResult == -1 && (now - lastScanStart > 8000)) {
+        // Recover from stalled scan
+        WiFi.scanDelete();
+        lastScanCompleted = now;
+    }
+
+    // Dwell on Channel 1 for 1.8 seconds between scans so SoftAP transmits beacons reliably
+    // and phones / computers can discover GhostH and maintain rock-solid connection
+    if (WiFi.scanComplete() != -1 && (now - lastScanCompleted >= 1800)) {
         WiFi.scanNetworks(true, true);
         lastScanStart = now;
     }
