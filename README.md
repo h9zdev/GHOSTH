@@ -30,12 +30,12 @@
 
 <br>
 
+📖 **[GhostH Official GitHub Wiki](https://github.com/h9zdev/GHOSTH/wiki)**
+🌐 **[Developer Website](https://haybnz.web.app/)**
+
+
 </div>
 
-* 📖 **[GhostH Official GitHub Wiki](https://github.com/h9zdev/GHOSTH/wiki)**
-* 🌐 **[Developer Website](https://haybnz.web.app/)**
-
----
 
 ## 📱 Android App Installation & Setup
 
