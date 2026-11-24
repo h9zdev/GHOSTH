@@ -11,3 +11,4 @@ fi
 echo "[*] Erasing entire flash memory on $PORT..."
 python3 -m esptool --port "$PORT" erase_flash
 echo "[✓] Flash memory wiped clean."
+

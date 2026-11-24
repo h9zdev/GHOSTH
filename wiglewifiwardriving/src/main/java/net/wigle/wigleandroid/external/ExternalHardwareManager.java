@@ -1,14 +1,24 @@
 package net.wigle.wigleandroid.external;
 
 import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.hardware.usb.UsbDevice;
+import android.hardware.usb.UsbDeviceConnection;
+import android.hardware.usb.UsbManager;
+import android.os.Build;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.hoho.android.usbserial.driver.UsbSerialDriver;
+import com.hoho.android.usbserial.driver.UsbSerialPort;
+import com.hoho.android.usbserial.driver.UsbSerialProber;
 
 import net.wigle.wigleandroid.ListFragment;
 import net.wigle.wigleandroid.MainActivity;
@@ -22,8 +32,11 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,13 +44,14 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Controller for External Companion Hardware.
- * Ingests promiscuous Wi-Fi frames from ESP32 companions (via Bluetooth Serial / USB),
+ * Ingests promiscuous Wi-Fi frames from ESP8266/ESP32 companions (via USB Serial OTG / Wi-Fi AP / Bluetooth SPP),
  * Raspberry Pi / Kali monitor streams, and RTL-SDR receivers.
  */
 public class ExternalHardwareManager {
 
     private static final UUID SPP_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
     public static final String PREF_PASSIVE_CAPTURE_ONLY = "pref_passive_capture_only";
+    public static final String ACTION_USB_PERMISSION = "droid.wardriver.hx.os.USB_PERMISSION";
 
     private static volatile ExternalHardwareManager instance;
 
@@ -48,15 +62,25 @@ public class ExternalHardwareManager {
     private final AtomicBoolean esp32Connected = new AtomicBoolean(false);
     private final AtomicBoolean piConnected = new AtomicBoolean(false);
     private final AtomicBoolean sdrConnected = new AtomicBoolean(false);
+    private final AtomicBoolean usbConnected = new AtomicBoolean(false);
+    private final AtomicBoolean ghostHConnected = new AtomicBoolean(false);
     private final AtomicLong packetsReceived = new AtomicLong(0);
 
     private BluetoothSocket btSocket;
     private Socket piSocket;
     private Socket sdrSocket;
+    private Socket ghostHSocket;
+    private UsbSerialPort usbSerialPort;
 
     public interface ConnectionCallback {
         void onResult(boolean success, String message);
     }
+
+    public interface TelemetryListener {
+        void onTelemetryLine(String line);
+    }
+
+    private final List<TelemetryListener> telemetryListeners = new CopyOnWriteArrayList<>();
 
     private ExternalHardwareManager(@NonNull Context context) {
         this.context = context.getApplicationContext();
@@ -70,8 +94,26 @@ public class ExternalHardwareManager {
         return instance;
     }
 
+    public void addTelemetryListener(TelemetryListener listener) {
+        if (listener != null && !telemetryListeners.contains(listener)) {
+            telemetryListeners.add(listener);
+        }
+    }
+
+    public void removeTelemetryListener(TelemetryListener listener) {
+        telemetryListeners.remove(listener);
+    }
+
     public boolean isEsp32Connected() {
         return esp32Connected.get();
+    }
+
+    public boolean isUsbConnected() {
+        return usbConnected.get();
+    }
+
+    public boolean isGhostHConnected() {
+        return ghostHConnected.get();
     }
 
     public long getEsp32PacketsReceived() {
@@ -100,6 +142,138 @@ public class ExternalHardwareManager {
 
     public void setPassiveCaptureOnly(boolean enabled) {
         prefs.edit().putBoolean(PREF_PASSIVE_CAPTURE_ONLY, enabled).apply();
+    }
+
+    /**
+     * Scan and Connect directly to NodeMCU / ESP8266 / ESP32 via USB Serial (OTG).
+     * Supports CH340, CP2102, FTDI, and CDC devices.
+     */
+    public void scanAndConnectUsbSerial(final ConnectionCallback callback) {
+        if (usbConnected.get()) {
+            disconnectUsbSerial();
+            if (callback != null) callback.onResult(false, "USB Serial Disconnected");
+            return;
+        }
+
+        UsbManager usbManager = (UsbManager) context.getSystemService(Context.USB_SERVICE);
+        if (usbManager == null) {
+            if (callback != null) callback.onResult(false, "USB Service not available on this device");
+            return;
+        }
+
+        List<UsbSerialDriver> availableDrivers = UsbSerialProber.getDefaultProber().findAllDrivers(usbManager);
+        if (availableDrivers.isEmpty()) {
+            if (callback != null) callback.onResult(false, "No USB Serial hardware detected. Connect NodeMCU via USB OTG cable.");
+            return;
+        }
+
+        UsbSerialDriver driver = availableDrivers.get(0);
+        UsbDevice device = driver.getDevice();
+
+        if (!usbManager.hasPermission(device)) {
+            int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ? PendingIntent.FLAG_IMMUTABLE : 0;
+            PendingIntent pi = PendingIntent.getBroadcast(context, 0, new Intent(ACTION_USB_PERMISSION), flags);
+            usbManager.requestPermission(device, pi);
+            if (callback != null) callback.onResult(false, "USB permission requested for " + device.getDeviceName() + ". Allow permission and tap scan again.");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                UsbDeviceConnection connection = usbManager.openDevice(device);
+                if (connection == null) {
+                    if (callback != null) callback.onResult(false, "Unable to open USB connection (Null handle)");
+                    return;
+                }
+
+                UsbSerialPort port = driver.getPorts().get(0);
+                port.open(connection);
+                port.setParameters(115200, 8, UsbSerialPort.STOPBITS_1, UsbSerialPort.PARITY_NONE);
+                port.setDTR(true);
+                port.setRTS(true);
+
+                usbSerialPort = port;
+                usbConnected.set(true);
+
+                String devName = device.getProductName() != null ? device.getProductName() : ("Device " + device.getDeviceId());
+                if (callback != null) callback.onResult(true, "Connected to USB Serial: " + devName + " @ 115200 baud");
+
+                byte[] buffer = new byte[2048];
+                StringBuilder sb = new StringBuilder();
+
+                while (usbConnected.get()) {
+                    int len = port.read(buffer, 1000);
+                    if (len > 0) {
+                        sb.append(new String(buffer, 0, len, StandardCharsets.UTF_8));
+                        int newlineIdx;
+                        while ((newlineIdx = sb.indexOf("\n")) != -1) {
+                            String line = sb.substring(0, newlineIdx).trim();
+                            sb.delete(0, newlineIdx + 1);
+                            if (!line.isEmpty()) {
+                                processPacketLine(line);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Logging.error("USB Serial error: " + ex, ex);
+                disconnectUsbSerial();
+                if (callback != null) callback.onResult(false, "USB Serial error: " + ex.getMessage());
+            }
+        });
+    }
+
+    public void disconnectUsbSerial() {
+        usbConnected.set(false);
+        try {
+            if (usbSerialPort != null) {
+                usbSerialPort.close();
+                usbSerialPort = null;
+            }
+        } catch (Exception ignored) {
+        }
+    }
+
+    /**
+     * Connect to NodeMCU GhostH Access Point telemetry stream over TCP (Default 192.168.4.1:8888).
+     */
+    public void connectGhostH(@NonNull final String host, final int port, final ConnectionCallback callback) {
+        if (ghostHConnected.get()) {
+            disconnectGhostH();
+            if (callback != null) callback.onResult(false, "Disconnected GhostH AP");
+            return;
+        }
+
+        executor.execute(() -> {
+            try {
+                ghostHSocket = new Socket();
+                ghostHSocket.connect(new InetSocketAddress(host, port), 5000);
+                ghostHConnected.set(true);
+
+                if (callback != null) callback.onResult(true, "Connected to GhostH AP at " + host + ":" + port);
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ghostHSocket.getInputStream()));
+                String line;
+                while (ghostHConnected.get() && (line = reader.readLine()) != null) {
+                    processPacketLine(line);
+                }
+            } catch (Exception ex) {
+                Logging.error("GhostH AP TCP connection error: " + ex, ex);
+                disconnectGhostH();
+                if (callback != null) callback.onResult(false, "GhostH connection error: " + ex.getMessage());
+            }
+        });
+    }
+
+    public void disconnectGhostH() {
+        ghostHConnected.set(false);
+        try {
+            if (ghostHSocket != null) {
+                ghostHSocket.close();
+                ghostHSocket = null;
+            }
+        } catch (Exception ignored) {
+        }
     }
 
     /**
@@ -257,6 +431,14 @@ public class ExternalHardwareManager {
      * GHOSTH,<TYPE>,<BSSID>,<RSSI>,<CHANNEL>,<SSID>
      */
     public void processPacketLine(@NonNull final String line) {
+        // Broadcast to UI telemetry listeners
+        for (TelemetryListener listener : telemetryListeners) {
+            try {
+                listener.onTelemetryLine(line);
+            } catch (Exception ignored) {
+            }
+        }
+
         if (!line.startsWith("GHOSTH,")) return;
 
         try {
@@ -277,7 +459,8 @@ public class ExternalHardwareManager {
                 if (MainActivity.getNetworkCache() != null) {
                     Network net = MainActivity.getNetworkCache().get(bssid);
                     if (net == null) {
-                        net = new Network(bssid, ssid, freq, "[WPA2][ESS]", rssi, NetworkType.WIFI);
+                        String capabilities = "ALPR".equalsIgnoreCase(frameType) ? "[FLOCK-ALPR-OPTICAL]" : "[WPA2][ESS]";
+                        net = new Network(bssid, ssid, freq, capabilities, rssi, NetworkType.WIFI);
                         net.setLevel(rssi);
                         if (ListFragment.lameStatic.location != null) {
                             net.setLatLng(new net.wigle.wigleandroid.model.LatLng(
@@ -305,4 +488,3 @@ public class ExternalHardwareManager {
         }
     }
 }
-

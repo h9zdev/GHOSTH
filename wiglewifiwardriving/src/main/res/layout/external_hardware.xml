@@ -15,7 +15,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="// EXTERNAL RADIO HARDWARE"
+            android:text="// EXTERNAL RADIO HARDWARE &amp; SENSORS"
             android:textColor="@color/cyber_cyan"
             android:textSize="14sp"
             android:textStyle="bold"
@@ -59,6 +59,98 @@
                 android:layout_height="wrap_content" />
         </LinearLayout>
 
+        <!-- NodeMCU GhostH Sniffer & ALPR Detector Card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@drawable/cyber_minimal_bg"
+            android:padding="10dp"
+            android:layout_marginBottom="8dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_device_iot"
+                    android:contentDescription="NodeMCU GhostH" />
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:paddingStart="8dp"
+                    android:text="NODEMCU GHOSTH COMPANION"
+                    android:textColor="@color/cyber_cyan"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/nodemcu_status_badge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DISCONNECTED"
+                    android:textColor="@color/cyber_pink"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Promiscuous 802.11 sniffer + optical Flock ALPR pulse discriminator (25-65Hz). Connect via USB-OTG serial or Wi-Fi AP 'GhostH'."
+                android:textColor="@color/cyber_dim_cyan"
+                android:textSize="11sp"
+                android:paddingTop="3dp" />
+
+            <TextView
+                android:id="@+id/nodemcu_packet_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Packets Ingested: 0"
+                android:textColor="@color/cyber_yellow"
+                android:textSize="11sp"
+                android:paddingTop="2dp" />
+
+            <!-- USB Scan & Connect Button -->
+            <Button
+                android:id="@+id/btn_scan_usb"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:text="SCAN &amp; CONNECT USB SERIAL (OTG)"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <!-- GhostH Wi-Fi Connect Button -->
+            <Button
+                android:id="@+id/btn_connect_ghosth_wifi"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="CONNECT GHOSTH WI-FI (192.168.4.1:8888)"
+                android:textColor="@color/cyber_cyan"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <!-- Web Portal Button to Change Password / SSID -->
+            <Button
+                android:id="@+id/btn_open_ghosth_portal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="OPEN WEB CONFIG (CHANGE PASSWORD / SSID)"
+                android:textColor="@color/cyber_yellow"
+                android:backgroundTint="#0C1425"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+        </LinearLayout>
+
         <!-- ESP32 Promiscuous Sniffer Card -->
         <LinearLayout
             android:layout_width="match_parent"
@@ -85,7 +177,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:paddingStart="8dp"
-                    android:text="ESP32 PROMISCUOUS SNIFFER"
+                    android:text="ESP32 BLUETOOTH SPP"
                     android:textColor="@color/cyber_cyan"
                     android:textSize="13sp"
                     android:textStyle="bold" />
@@ -103,7 +195,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Ingests raw beacon &amp; probe request frames streamed over Bluetooth SPP or USB Serial."
+                android:text="Ingests raw beacon &amp; probe request frames streamed over Bluetooth SPP."
                 android:textColor="@color/cyber_dim_cyan"
                 android:textSize="11sp"
                 android:paddingTop="3dp" />
@@ -303,6 +395,6 @@
             android:padding="8dp"
             android:textColor="@color/cyber_cyan"
             android:textSize="11sp"
-            android:text="// Hardware bus ready.\n// Select ESP32, Pi/Kali, or RTL-SDR companion to stream RF data." />
+            android:text="// Hardware bus ready.\n// Plug in NodeMCU (USB-OTG) or connect to GhostH Wi-Fi AP." />
     </LinearLayout>
 </ScrollView>
