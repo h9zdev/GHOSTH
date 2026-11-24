@@ -1,15 +1,20 @@
-# GHOSTH // WARDRIVER HX OS ⚡
+# GHOSTH - Every signal leaves a trace.
 
-[![Android](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026%2B)-brightgreen.svg)](https://developer.android.com)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-purple.svg)](https://kotlinlang.org)
-[![Desktop](https://img.shields.io/badge/Desktop-Linux%20%7C%20Windows-blue.svg)](https://github.com/h9zdev/GHOSTH/releases)
-[![Firmware](https://img.shields.io/badge/Firmware-ESP8266%20NodeMCU%20v2.2-orange.svg)](firmware/nodemcu_ghosth/)
-[![Passive](https://img.shields.io/badge/Mode-100%25%20Passive%20%2F%20Metadata%20Only-cyan.svg)](#-passive-operational-principles--disclaimer)
-[![Releases](https://img.shields.io/badge/Release-v2.0.0-green.svg)](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0)
 
-**GhostH (droid.wardriver.hx.os)** is an advanced, tactical Android wardriving, RF signal intelligence, and wireless spatial analytics platform. Built upon the battle-tested WiGLE Android core, GhostH elevates RF reconnaissance with a sleek **Cyberpunk HUD interface**, a full-featured **Passive Machine Learning & Spatial Analytics Engine**, **OpenStreetMap (FOSS) offline vector mapping**, an **External NodeMCU Companion Subsystem** for multi-channel RF harvesting and optical infrared strobe detection (Flock ALPR), and a cross-platform **Desktop Suite** for Windows and Linux.
+<p align="center">
+  <img src="https://github.com/h9zdev/GHOSTH/blob/main/GHOSTH.png" alt="GHOSTH" />
+</p>
 
----
+<br>
+
+[![Android](https://img.shields.io/badge/Platform-Android%208.0%2B%20(API%2026%2B)-brightgreen.svg?style=flat-square&logo=android&logoColor=white)](https://developer.android.com)
+[![Desktop](https://img.shields.io/badge/Desktop-Linux%20%7C%20Windows-blue.svg?style=flat-square&logo=linux&logoColor=white)](https://github.com/h9zdev/GHOSTH/releases)
+[![Firmware](https://img.shields.io/badge/Firmware-ESP8266%20NodeMCU%20v2.2-orange.svg?style=flat-square&logo=espressif&logoColor=white)](firmware/nodemcu_ghosth/)
+[![Release](https://img.shields.io/badge/Release-v2.0.0-green.svg?style=flat-square)](https://github.com/h9zdev/GHOSTH/releases/tag/v2.0.0)
+
+<br>
+
+**GhostH** (`droid.wardriver.hx.os`) is an advanced Android platform for wardriving, RF signal intelligence, and wireless spatial analytics. Built on the proven WiGLE Android core, it adds a passive machine learning and spatial analytics engine, offline OpenStreetMap vector mapping, and a purpose-built dark interface for field use. An external NodeMCU companion subsystem provides multi-channel RF harvesting and optical infrared strobe detection (Flock ALPR), and a cross-platform desktop suite supports Windows and Linux.
 
 ## 📑 Table of Contents
 - [Quick Links & Downloads](#-quick-links--downloads)
