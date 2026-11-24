@@ -1,18 +1,16 @@
 /*
  * =====================================================================
- * GHOSTH // WARDRIVER HX OS - NODEMCU COMPANION FIRMWARE
- * Target: ESP8266 (NodeMCU v2 / v3)
+ * GHOSTH // WARDRIVER HX OS - NODEMCU COMPANION FIRMWARE v2.1
+ * Target: ESP8266 (NodeMCU v2 / v3 / CP2102 / CH340)
  *
- * Capabilities:
- * 1. Promiscuous 802.11 Wi-Fi Beacon & Probe Request Sniffer (Ch 1 - 13)
- * 2. Flock ALPR Optical Infrared (850nm / 940nm) Strobe Pulse Detector
- * 3. Dual Telemetry Transport:
- *    - USB Serial @ 115200 baud (Direct USB-OTG into Android App)
- *    - Standalone TCP Socket Server (Port 8888 over AP "GhostH")
- * 4. Web Configuration Portal (http://192.168.4.1) to change AP SSID/Password
- *
- * Compatible with GhostH ExternalHardwareManager protocol:
- * GHOSTH,<TYPE>,<BSSID>,<RSSI>,<CHANNEL>,<SSID>
+ * Features:
+ * 1. Dedicated, Always-On SoftAP ("GhostH" / "ghosth1234")
+ * 2. Web Configuration Portal (http://192.168.4.1) to change AP SSID/Password in EEPROM
+ * 3. Continuous Asynchronous 802.11 RF Ingest (Channels 1 - 13, all SSIDs & BSSIDs)
+ * 4. Flock ALPR Optical Infrared (850nm / 940nm) Pulse Strobe Discriminator (25-65Hz)
+ * 5. Dual Telemetry Stream:
+ *    - USB Serial @ 115200 baud (Direct USB-OTG connection to phone)
+ *    - TCP Socket Server on Port 8888 (Wi-Fi Companion stream to app)
  * =====================================================================
  */
 
@@ -21,10 +19,6 @@
 #include <ESP8266WebServer.h>
 #include <EEPROM.h>
 
-extern "C" {
-  #include "user_interface.h"
-}
-
 // -------------------------------------------------------------
 // Hardware Pin Definitions
 // -------------------------------------------------------------
@@ -32,15 +26,6 @@ extern "C" {
 #define PIN_IR_ANALOG    A0  // A0: Raw IR Irradiance Level
 #define PIN_ALERT_BUZZER 5   // D1 (GPIO 5): Local Alert Buzzer / LED
 #define PIN_ONBOARD_LED  2   // D4 (GPIO 2): Built-in Blue LED (Active LOW)
-
-// -------------------------------------------------------------
-// Sniffer & Channel Hopping Configuration
-// -------------------------------------------------------------
-#define CHANNEL_HOP_INTERVAL_MS 250
-#define MAX_CHANNEL 13
-
-uint8_t currentChannel = 1;
-unsigned long lastChannelHop = 0;
 
 // -------------------------------------------------------------
 // ALPR Optical IR Strobe Timing Variables
@@ -69,50 +54,18 @@ WiFiServer tcpServer(8888);
 WiFiClient activeClient;
 ESP8266WebServer webServer(80);
 
-// -------------------------------------------------------------
-// 802.11 Frame Header Structures
-// -------------------------------------------------------------
-struct RxControl {
-    signed rssi:8;
-    unsigned rate:4;
-    unsigned is_group:1;
-    unsigned:1;
-    unsigned sig_mode:2;
-    unsigned legacy_length:12;
-    unsigned damatch0:1;
-    unsigned damatch1:1;
-    unsigned bssidmatch0:1;
-    unsigned bssidmatch1:1;
-    unsigned MCS:7;
-    unsigned CWB:1;
-    unsigned HT_length:16;
-    unsigned Smoothing:1;
-    unsigned Not_Sounding:1;
-    unsigned:1;
-    unsigned Aggregation:1;
-    unsigned STBC:2;
-    unsigned FEC_CODING:1;
-    unsigned SGI:1;
-    unsigned rxend_state:8;
-    unsigned ampdu_cnt:8;
-    unsigned channel:4;
-    unsigned:12;
-};
-
-struct SnifferPacket {
-    struct RxControl rx_ctrl;
-    uint8_t buf[112];
-    uint16_t cnt;
-    uint16_t len;
-};
+unsigned long lastTelemetryHeartbeat = 0;
+unsigned long lastScanStart = 0;
 
 void loadConfig() {
     EEPROM.begin(sizeof(Config));
     EEPROM.get(0, config);
-    if (config.magic != EEPROM_MAGIC) {
+    if (config.magic != EEPROM_MAGIC || strlen(config.apSsid) == 0 || strlen(config.apPass) < 8) {
         config.magic = EEPROM_MAGIC;
-        strncpy(config.apSsid, "GhostH", sizeof(config.apSsid));
-        strncpy(config.apPass, "ghosth1234", sizeof(config.apPass));
+        strncpy(config.apSsid, "GhostH", sizeof(config.apSsid) - 1);
+        config.apSsid[sizeof(config.apSsid) - 1] = '\0';
+        strncpy(config.apPass, "ghosth1234", sizeof(config.apPass) - 1);
+        config.apPass[sizeof(config.apPass) - 1] = '\0';
         EEPROM.put(0, config);
         EEPROM.commit();
     }
@@ -145,63 +98,31 @@ void broadcastTelemetry(const String &line) {
     }
 }
 
-// 802.11 Promiscuous RX Callback
-void ICACHE_RAM_ATTR snifferCallback(uint8_t *buf, uint16_t len) {
-    if (len < 36) return;
-
-    struct SnifferPacket *sniffer = (struct SnifferPacket*) buf;
-    int rssi = sniffer->rx_ctrl.rssi;
-    uint8_t *frame = sniffer->buf;
-    uint8_t frameType = frame[0];
-
-    // Beacon Frame (0x80) or Probe Request (0x40) / Probe Response (0x50)
-    if (frameType == 0x80 || frameType == 0x40 || frameType == 0x50) {
-        char bssidStr[18];
-        snprintf(bssidStr, sizeof(bssidStr), "%02X:%02X:%02X:%02X:%02X:%02X",
-                 frame[16], frame[17], frame[18], frame[19], frame[20], frame[21]);
-
-        char ssid[33];
-        memset(ssid, 0, sizeof(ssid));
-
-        if (frameType == 0x80 && len >= 38) {
-            uint8_t ssidLen = frame[37];
-            if (ssidLen > 0 && ssidLen <= 32 && (38 + ssidLen <= len)) {
-                memcpy(ssid, &frame[38], ssidLen);
-                ssid[ssidLen] = '\0';
-            }
-        }
-
-        String typeStr = (frameType == 0x80) ? "BEACON" : "PROBE";
-        String ssidStr = String(ssid);
-        if (ssidStr.length() == 0) ssidStr = "<Hidden>";
-
-        // Format: GHOSTH,<TYPE>,<BSSID>,<RSSI>,<CHANNEL>,<SSID>
-        String packetLine = "GHOSTH," + typeStr + "," + String(bssidStr) + "," +
-                            String(rssi) + "," + String(currentChannel) + "," + ssidStr;
-
-        broadcastTelemetry(packetLine);
-    }
-}
-
 // -------------------------------------------------------------
 // Web Configuration Portal Handlers
 // -------------------------------------------------------------
 void handleWebRoot() {
     String html = "<!DOCTYPE html><html><head><meta name='viewport' content='width=device-width,initial-scale=1'>";
     html += "<title>GhostH NodeMCU Portal</title>";
-    html += "<style>body{background:#05070e;color:#00fff2;font-family:sans-serif;padding:20px;text-align:center;}";
-    html += ".card{background:#0d111a;border:1px solid #00fff2;border-radius:8px;padding:20px;max-width:360px;margin:auto;}";
-    html += "input{width:90%;padding:10px;margin:10px 0;background:#05070e;border:1px solid #00fff2;color:#fff;border-radius:4px;}";
-    html += "button{background:#00fff2;color:#05070e;border:none;padding:12px 20px;font-weight:bold;border-radius:4px;cursor:pointer;}";
+    html += "<style>body{background:#05070e;color:#00fff2;font-family:monospace,sans-serif;padding:20px;text-align:center;}";
+    html += ".card{background:#0d111a;border:1px solid #00fff2;border-radius:8px;padding:20px;max-width:380px;margin:auto;}";
+    html += "input{width:90%;padding:10px;margin:10px 0;background:#05070e;border:1px solid #00fff2;color:#fff;border-radius:4px;font-size:14px;}";
+    html += "button{background:#00fff2;color:#05070e;border:none;padding:12px 24px;font-weight:bold;border-radius:4px;cursor:pointer;font-size:14px;}";
+    html += ".badge{display:inline-block;padding:4px 8px;background:#00fff2;color:#05070e;font-weight:bold;border-radius:3px;margin-bottom:12px;}";
     html += "</style></head><body><div class='card'>";
-    html += "<h2>// GHOSTH NODEMCU</h2><p>Companion RF & ALPR Sniffer</p>";
+    html += "<h2>// GHOSTH COMPANION</h2>";
+    html += "<div class='badge'>STATUS: ONLINE</div>";
+    html += "<p>RF Sniffer &amp; Flock ALPR Detector</p>";
     html += "<form method='POST' action='/save'>";
     html += "<label>Access Point SSID:</label><br>";
     html += "<input type='text' name='ssid' value='" + String(config.apSsid) + "' required><br>";
     html += "<label>Access Point Password:</label><br>";
     html += "<input type='text' name='pass' value='" + String(config.apPass) + "' required minlength='8'><br><br>";
-    html += "<button type='submit'>SAVE & REBOOT</button>";
-    html += "</form></div></body></html>";
+    html += "<button type='submit'>SAVE &amp; REBOOT</button>";
+    html += "</form>";
+    html += "<hr style='border-color:#1a2333;margin:20px 0;'>";
+    html += "<p style='font-size:12px;color:#6b829d;'>Telemetry Stream: 192.168.4.1:8888<br>USB Serial: 115200 baud</p>";
+    html += "</div></body></html>";
     webServer.send(200, "text/html", html);
 }
 
@@ -210,21 +131,23 @@ void handleWebSave() {
         String newSsid = webServer.arg("ssid");
         String newPass = webServer.arg("pass");
         if (newSsid.length() > 0 && newPass.length() >= 8) {
-            strncpy(config.apSsid, newSsid.c_str(), sizeof(config.apSsid));
-            strncpy(config.apPass, newPass.c_str(), sizeof(config.apPass));
+            strncpy(config.apSsid, newSsid.c_str(), sizeof(config.apSsid) - 1);
+            config.apSsid[sizeof(config.apSsid) - 1] = '\0';
+            strncpy(config.apPass, newPass.c_str(), sizeof(config.apPass) - 1);
+            config.apPass[sizeof(config.apPass) - 1] = '\0';
             saveConfig();
-            webServer.send(200, "text/html", "<html><body style='background:#05070e;color:#00fff2;text-align:center;'><h2>Saved! Rebooting...</h2></body></html>");
+            webServer.send(200, "text/html", "<html><body style='background:#05070e;color:#00fff2;text-align:center;'><h2>Settings Saved! Rebooting NodeMCU...</h2></body></html>");
             delay(1000);
             ESP.restart();
             return;
         }
     }
-    webServer.send(400, "text/plain", "Invalid Parameters");
+    webServer.send(400, "text/plain", "Invalid Parameters. Password must be >= 8 chars.");
 }
 
 void setup() {
     Serial.begin(115200);
-    delay(200);
+    delay(300);
 
     loadConfig();
 
@@ -233,50 +156,90 @@ void setup() {
     pinMode(PIN_ALERT_BUZZER, OUTPUT);
     pinMode(PIN_ONBOARD_LED, OUTPUT);
     digitalWrite(PIN_ALERT_BUZZER, LOW);
-    digitalWrite(PIN_ONBOARD_LED, HIGH);
+    digitalWrite(PIN_ONBOARD_LED, HIGH); // LED off
 
     // Attach hardware interrupt for Flock ALPR IR detection
     attachInterrupt(digitalPinToInterrupt(PIN_IR_DIGITAL), onIrPulse, FALLING);
 
-    // Start Wi-Fi Access Point with configured name (Default: "GhostH" / "ghosth1234")
+    // Explicitly configure and start SoftAP (Channel 1, visible)
+    WiFi.disconnect(true);
+    delay(100);
     WiFi.mode(WIFI_AP_STA);
-    WiFi.softAP(config.apSsid, config.apPass);
+    IPAddress apIP(192, 168, 4, 1);
+    IPAddress netMsk(255, 255, 255, 0);
+    WiFi.softAPConfig(apIP, apIP, netMsk);
+    
+    // Start SoftAP: ssid, passphrase, channel, hidden (0 = visible), max_connection (4)
+    bool apSuccess = WiFi.softAP(config.apSsid, config.apPass, 1, 0, 4);
 
     // Start Web Server & TCP Telemetry Server
     webServer.on("/", HTTP_GET, handleWebRoot);
     webServer.on("/save", HTTP_POST, handleWebSave);
     webServer.begin();
+
     tcpServer.begin();
+    tcpServer.setNoDelay(true);
 
-    // Enable 802.11 promiscuous packet sniffing
-    wifi_set_opmode(STATION_MODE);
-    wifi_promiscuous_enable(0);
-    WiFi.disconnect();
-    wifi_set_promiscuous_rx_cb(snifferCallback);
-    wifi_set_channel(currentChannel);
-    wifi_promiscuous_enable(1);
+    // Trigger initial asynchronous Wi-Fi scan
+    WiFi.scanNetworks(true, true);
+    lastScanStart = millis();
 
-    broadcastTelemetry("$GHOSTH,BOOT,VERSION=2.0,SSID=" + String(config.apSsid) + ",BAUD=115200*7F");
+    Serial.println();
+    Serial.println("==================================================");
+    Serial.println("// GHOSTH NODEMCU COMPANION v2.1 ONLINE");
+    Serial.println("// SoftAP SSID: " + String(config.apSsid));
+    Serial.println("// SoftAP Pass: " + String(config.apPass));
+    Serial.println("// SoftAP IP:   " + WiFi.softAPIP().toString());
+    Serial.println("// Web Config:  http://" + WiFi.softAPIP().toString());
+    Serial.println("// TCP Stream:  port 8888");
+    Serial.println("// AP Started:  " + String(apSuccess ? "SUCCESS" : "FAILED"));
+    Serial.println("==================================================");
+
+    broadcastTelemetry("$GHOSTH,BOOT,VERSION=2.1,SSID=" + String(config.apSsid) + ",BAUD=115200*7F");
     broadcastTelemetry("GHOSTH,INFO,00:00:00:00:00:00,0,1,GhostH Companion Online (AP: " + String(config.apSsid) + ")");
 }
 
 void loop() {
     unsigned long now = millis();
 
-    // Handle Web Config Portal requests
+    // 1. Handle Web Configuration Portal requests
     webServer.handleClient();
 
-    // 1. Channel Hopping (Channels 1 to 13)
-    if (now - lastChannelHop >= CHANNEL_HOP_INTERVAL_MS) {
-        lastChannelHop = now;
-        currentChannel++;
-        if (currentChannel > MAX_CHANNEL) {
-            currentChannel = 1;
+    // 2. Handle incoming TCP client (Phone companion connection)
+    if (!activeClient || !activeClient.connected()) {
+        WiFiClient newClient = tcpServer.available();
+        if (newClient) {
+            activeClient = newClient;
+            activeClient.println("GHOSTH,STATUS,00:00:00:00:00:00,0,1,Connected to GhostH AP Sniffer Stream");
         }
-        wifi_set_channel(currentChannel);
     }
 
-    // 2. Optical ALPR Strobe Evaluation Window (400 ms)
+    // 3. Process Asynchronous Wi-Fi Network Scan Results
+    int scanResult = WiFi.scanComplete();
+    if (scanResult >= 0) {
+        for (int i = 0; i < scanResult; i++) {
+            String bssid = WiFi.BSSIDstr(i);
+            int rssi = WiFi.RSSI(i);
+            int channel = WiFi.channel(i);
+            String ssid = WiFi.SSID(i);
+            if (ssid.length() == 0) ssid = "<Hidden>";
+
+            // Format: GHOSTH,BEACON,<BSSID>,<RSSI>,<CHANNEL>,<SSID>
+            String packetLine = "GHOSTH,BEACON," + bssid + "," + String(rssi) + "," +
+                                String(channel) + "," + ssid;
+            broadcastTelemetry(packetLine);
+            yield();
+        }
+        WiFi.scanDelete();
+        WiFi.scanNetworks(true, true);
+        lastScanStart = now;
+    } else if (scanResult == -2 && (now - lastScanStart > 5000)) {
+        // Scan was cancelled or stalled, restart
+        WiFi.scanNetworks(true, true);
+        lastScanStart = now;
+    }
+
+    // 4. Optical ALPR Strobe Evaluation Window (400 ms)
     if (now - lastIrWindowCheck >= IR_WINDOW_MS) {
         noInterrupts();
         unsigned int count = pulseCount;
@@ -291,10 +254,9 @@ void loop() {
 
         if (count >= 10 && pulseFreq >= 25.0 && pulseFreq <= 65.0) {
             digitalWrite(PIN_ALERT_BUZZER, HIGH);
-            digitalWrite(PIN_ONBOARD_LED, LOW);
+            digitalWrite(PIN_ONBOARD_LED, LOW); // LED ON
 
-            String alprLine = "GHOSTH,ALPR,FL:OC:CA:LP:01:00," + String(rawIr) + "," +
-                              String(currentChannel) + ",FLOCK_IR_STROBE_" + String((int)pulseFreq) + "HZ";
+            String alprLine = "GHOSTH,ALPR,FL:OC:CA:LP:01:00," + String(rawIr) + ",1,FLOCK_IR_STROBE_" + String((int)pulseFreq) + "HZ";
             broadcastTelemetry(alprLine);
 
             String nmeaSentence = "$ALPR_STRIKE,TYPE=PULSED_IR,FREQ=" + String(pulseFreq, 1) +
@@ -302,18 +264,16 @@ void loop() {
             broadcastTelemetry(nmeaSentence);
         } else {
             digitalWrite(PIN_ALERT_BUZZER, LOW);
-            digitalWrite(PIN_ONBOARD_LED, HIGH);
+            digitalWrite(PIN_ONBOARD_LED, HIGH); // LED OFF
         }
 
         lastIrWindowCheck = now;
     }
 
-    // 3. Handle incoming TCP client (Wi-Fi Companion connection)
-    if (!activeClient || !activeClient.connected()) {
-        activeClient = tcpServer.available();
-        if (activeClient) {
-            activeClient.println("GHOSTH,STATUS,00:00:00:00:00:00,0,1,Client Connected to GhostH Sniffer");
-        }
+    // 5. Heartbeat every 10 seconds
+    if (now - lastTelemetryHeartbeat >= 10000) {
+        lastTelemetryHeartbeat = now;
+        broadcastTelemetry("GHOSTH,HEARTBEAT,00:00:00:00:00:00,0,1,GhostH_Companion_Alive");
     }
 
     yield();
